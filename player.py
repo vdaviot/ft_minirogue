@@ -42,7 +42,7 @@ class	Player():
 	def actions(self, key, monster_table):
 		if(key == 32):
 			self.target = self.check_attack_case(monster_table)
-			if selqf.target:
+			if self.target:
 				proba = random.randrange(15)
 				if proba < self.strengh:
 					damages = max(self.strengh - self.target.armor, 0)
