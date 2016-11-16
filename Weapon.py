@@ -44,10 +44,10 @@ class Weapon():
 
 	def	randomize_weight(self, wtype):
 		if wtype == 1:
-			random.randrange(5)
+			random.randrange(1, 5)
 		if wtype == 2:
-			random.randrange(8)
+			random.randrange(4, 7)
 		if wtype == 3:
-			random.randrange(10)
+			random.randrange(7, 10)
 		if wtype == 4:
-			random.randrange(20)
+			random.randrange(10, 20)

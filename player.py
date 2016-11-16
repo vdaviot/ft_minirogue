@@ -18,6 +18,8 @@ class	Player():
 	def __init__(self, Map):
 		self.skin = "8"
 		self.hp = 12
+		self.level = 1
+		self.gold = 0
 		self.alive = True
 		self.in_level = 0
 		self.strength = 10
@@ -26,23 +28,22 @@ class	Player():
 		self.posY = Map.spawnY
 		self.Map = Map
 		self.status = ""
-		# self.precision = 90 // add a carac class for everyone
 		# self.dexterity = 
 		# self.endurance = 
 		# self.vitality =
-		# self.inventory_open = False
 		self.target = None
-		self.move = True
+		self.movement_allowed = True
 
 	def	move(self, event):
-		if event == KEY_UP:
-			self.check_case(self.posX, self.posY - 1)
-		if event == KEY_DOWN:
-			self.check_case(self.posX, self.posY + 1)
-		if event == KEY_LEFT:
-			self.check_case(self.posX - 1, self.posY)
-		if event == KEY_RIGHT:
-			self.check_case(self.posX + 1, self.posY)
+		if self.movement_allowed == True:
+			if event == KEY_UP:
+				self.check_case(self.posX, self.posY - 1)
+			if event == KEY_DOWN:
+				self.check_case(self.posX, self.posY + 1)
+			if event == KEY_LEFT:
+				self.check_case(self.posX - 1, self.posY)
+			if event == KEY_RIGHT:
+				self.check_case(self.posX + 1, self.posY)
 
 	def actions(self, key, monster_table):
 		if(key == 32):

@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-from mapp import Map_generator
+from Mapp import Map_generator
 from Monster import Monster
 
 class	Monster_table():

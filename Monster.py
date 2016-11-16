@@ -11,6 +11,7 @@
 # **************************************************************************** #
 
 import random
+from Mapp import Map_generator
 
 class	Monster():
 
@@ -23,7 +24,8 @@ class	Monster():
 			self.armor = 9
 			# self.precision = 90
 			# self.dexterity = 
-			# self.endurance = 
+			# self.endurance =
+			self.movement_allowed = True
 			self.strength = 12
 			self.monster_type = 10
 		else:
