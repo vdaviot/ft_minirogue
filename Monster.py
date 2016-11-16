@@ -21,12 +21,16 @@ class	Monster():
 			self.skin = "1"
 			self.hp = 16
 			self.armor = 9
-			self.strengh = 12
+			# self.precision = 90
+			# self.dexterity = 
+			# self.endurance = 
+			self.strength = 12
 			self.monster_type = 10
 		else:
 			self.init_random_monster()
 			self.hp = random.randrange(8)
 			self.boss = False
+		self.move = True
 		self.status = "Monster type {} is looking for a target.".format(self.monster_type)
 		self.random_position_monster()
 			
@@ -34,7 +38,7 @@ class	Monster():
 	def	init_random_monster(self):
 		self.monster_type = random.randrange(10)
 		self.skin = random.choice('@%&^?')
-		self.strengh = random.randrange(11)
+		self.strength = random.randrange(11)
 		self.armor = random.randrange(8)
 
 	def	random_position_monster(self):

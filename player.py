@@ -20,14 +20,19 @@ class	Player():
 		self.hp = 12
 		self.alive = True
 		self.in_level = 0
-		self.strengh = 10
+		self.strength = 10
 		self.armor = 5
 		self.posX = Map.spawnX
 		self.posY = Map.spawnY
 		self.Map = Map
 		self.status = ""
-		self.inventory_open = False
+		# self.precision = 90 // add a carac class for everyone
+		# self.dexterity = 
+		# self.endurance = 
+		# self.vitality =
+		# self.inventory_open = False
 		self.target = None
+		self.move = True
 
 	def	move(self, event):
 		if event == KEY_UP:
@@ -44,20 +49,31 @@ class	Player():
 			self.target = self.check_attack_case(monster_table)
 			if self.target:
 				proba = random.randrange(15)
-				if proba < self.strengh:
-					damages = max(self.strengh - self.target.armor, 0)
+				if proba < self.strength:
+					damages = max(self.strength - self.target.armor, 0)
 					self.target.hp -= damages
 					if self.target.hp <= 0:
 						self.target.status = "Monster type {} got hit for {} damages and died!".format(self.target.monster_type, damages)
 					else:
 						self.target.status = "Monster type {} got hit for {} damages!".format(self.target.monster_type, damages)
 				proba = random.randrange(15)
-				if proba < self.target.strengh:
-					damages = self.target.strengh - self.armor
+				if proba < self.target.strength:
+					damages = self.target.strength - self.armor
 					self.hp -= damages
 					self.status = "You've got hit for {}!".format(damages)
 				else:
 					self.status = "You've been missed!"
+
+
+	def refresh_statuses(self, should_run, win):
+		if self.hp <= 0:
+			self.status = "dead"
+			should_run = False
+		else:
+			if self.status == "poisonned":
+				self.hp -= 1
+			elif self.status == "bleeding":
+				self.hp -= 1
 
 
 	def	check_attack_case(self, monster_table):
