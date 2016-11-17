@@ -39,8 +39,7 @@ class	Monster():
 			self.init_random_monster()
 			self.hp = random.randrange(4, 12 + self.level)
 			self.boss = False
-		self.move = True
-		self.state = "looking for a target.".format(self.name)
+		self.state = "{} is looking for a target.".format(self.name)
 		self.target = None
 		self.status = Status()
 		self.random_position_monster()
@@ -48,7 +47,7 @@ class	Monster():
 
 	def	generate_bossname(self, generator):
 		name = generator.name().split()[0]
-		suffix = random.choice([", the mad scientist", ", the abobination", ", the sinful", ", the giant", ", the lost", ", the fallen", ", the archangel"])
+		suffix = random.choice([", the one legged", ", the mad scientist", ", the abobination", ", the sinful", ", the giant", ", the lost", ", the fallen", ", the archangel"])
 		prefix = random.choice(["Old ", "Sadic ", "", "", "Father ", ])
 		return prefix + name + suffix
 

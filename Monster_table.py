@@ -27,9 +27,9 @@ class	Monster_table():
 
 	def monster_movement(self):
 		for i in range(len(self.table)):
-			self.monster_pathfinder(self.table[i])
+			self.monster_idle(self.table[i])
 
-	def monster_pathfinder(self, monster):
+	def monster_idle(self, monster):
 		found = False
 		while found == False and monster.target == None:
 			px, py = monster.posX, monster.posY
