@@ -12,30 +12,50 @@
 
 import random
 from Mapp import Map_generator
+from faker import Factory
+from Status import Status
 
 class	Monster():
 
 	def	__init__(self, mapp, one=0):
+		generator = Factory.create('nl_NL')
 		self.map = mapp
+		self.level = 1
 		if one == 0:
 			self.boss = True
 			self.skin = "1"
-			self.hp = 16
-			self.armor = 9
-			# self.precision = 90
-			# self.dexterity = 
-			# self.endurance =
+			self.hp = random.randrange(10, 30 + self.level * 2)
+			self.armor = random.randrange(4, 12 + round(self.level / 2))
+			self.precision = random.randrange(40, 100 + (self.level * 15))
+			self.max_precision = self.precision
+			self.strength = random.randrange(7 + self.level, 13 + self.level)
+			self.dexterity = random.randrange(6 + self.level, 12 + self.level)
+			self.endurance = random.randrange(6 + self.level, 14 + self.level)
 			self.movement_allowed = True
-			self.strength = 12
 			self.monster_type = 10
+			self.name = self.generate_bossname(generator)
 		else:
+			self.name = self.generate_monstername()
 			self.init_random_monster()
-			self.hp = random.randrange(8)
+			self.hp = random.randrange(4, 12 + self.level)
 			self.boss = False
 		self.move = True
-		self.status = "Monster type {} is looking for a target.".format(self.monster_type)
+		self.state = "{} is looking for a target.".format(self.name)
+		self.status = Status()
 		self.random_position_monster()
 			
+
+	def	generate_bossname(self, generator):
+		name = generator.name().split()[0]
+		suffix = random.choice([", the mad scientist", ", the abobination", ", the sinful", ", the giant", ", the lost", ", the fallen", ", the archangel"])
+		prefix = random.choice(["Old ", "Sadic ", "", "", "Father ", ])
+		return prefix + name + suffix
+
+	def	generate_monstername(self):
+		name = random.choice(["Bat", "Zombie", "Rat", "Salamander", "Bear", "Ghoul", "Fdp"])
+		suffix = random.choice(["blue ", "red ", "green ", "yellow ", "", "", "", "", "", "", "", "", ""])
+		prefix = random.choice(["Angry ", "Hungry ", "Raging ", "Bad ass ", "Flying ", "Giant "])
+		return prefix + suffix + name
 
 	def	init_random_monster(self):
 		self.monster_type = random.randrange(10)
