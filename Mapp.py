@@ -5,9 +5,9 @@ class   Map_generator():
     def __init__(self, win):
         self.map = []
         self.map.append(" #########                                                  ")
-        self.map.append(" #.......#          #####           #########               ")
-        self.map.append(" #.......#          #...+++++       #.......#               ")
-        self.map.append(" #.......#       ++++...#   +       #.......#               ")
+        self.map.append(" #-------#          #####           #########               ")
+        self.map.append(" #-------#          #...+++++       #.......#               ")
+        self.map.append(" #-------#       ++++...#   +       #.......#               ")
         self.map.append(" ###+#####       +  #####   +       #.......#               ")
         self.map.append("    +            +          +++++++++.......#               ")
         self.map.append("    +            +                  #.......#               ")

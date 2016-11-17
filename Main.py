@@ -38,6 +38,7 @@ class	Main_game():
 				self.action = True
 
 			if self.action == True:
+				self.monster_table.monster_movement()
 				Main_game.turn += 1
 				self.action = False
 				

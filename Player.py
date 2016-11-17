@@ -56,9 +56,11 @@ class	Player(Status):
 		if(key == 32):
 			self.target = self.check_attack_case(monster_table)
 			if self.target:
+				self.target.target = "player"
 				proba = random.randrange(15)
 				if proba < self.strength:
 					damages = max(self.strength - self.target.armor, 0)
+					damages = abs(damages)
 					self.target.hp -= damages
 					if self.target.hp <= 0:
 						self.target.state = "{} got hit for {} damages and died!".format(self.target.name, damages)
@@ -75,24 +77,12 @@ class	Player(Status):
 				else:
 					self.state = "{} have been missed!".format(self.name)
 
-
-	# def refresh_status(self, should_run, win):
-	# 	if self.hp < 1:
-	# 		self.state = "dead"
-	# 		should_run = False
-	# 	else:
-	# 		if self.state == "poisonned":
-	# 			self.hp -= 1
-	# 		elif self.state == "bleeding":
-	# 			self.hp -= 1
-
-
 	def	check_attack_case(self, monster_table):
 		for m in monster_table.table:
 			if abs(m.posX - self.posX) + abs(m.posY - self.posY) == 1 and m.hp > 0:
 				return m
 
 	def check_case(self, x, y):
-		if(x >= 0 and y >= 0 and x < len(self.Map.map[0]) and y < len(self.Map.map) and (self.Map.map[y][x] == '.' or self.Map.map[y][x] == '+')):
+		if(x >= 0 and y >= 0 and x < len(self.Map.map[0]) and y < len(self.Map.map) and (self.Map.map[y][x] in '.+-')):
 			self.posX = x
 			self.posY = y

@@ -12,6 +12,7 @@
 
 from Mapp import Map_generator
 from Monster import Monster
+import random
 
 class	Monster_table():
 
@@ -23,4 +24,35 @@ class	Monster_table():
 				self.table.append(Monster(self.map, 0))
 			else:
 				self.table.append(Monster(self.map, 1))
+
+	def monster_movement(self):
+		for i in range(len(self.table)):
+			self.monster_pathfinder(self.table[i])
+
+	def monster_pathfinder(self, monster):
+		found = False
+		while found == False and monster.target == None:
+			px, py = monster.posX, monster.posY
+			rand = random.randrange(7)
+			if rand == 1:
+				px += 1
+			elif rand == 2:
+				px -= 1
+			elif rand == 3:
+				py += 1
+			elif rand == 4:
+				py -= 1
+			elif rand == 5:
+				py = py
+				px = px
+			elif rand == 6:
+				py = py
+				px = px
+			elif rand == 7:
+				py = py
+				px = px
+			if self.map.map[py][px] == '.':
+				monster.posX = px;
+				monster.posY = py;
+				found = True
 

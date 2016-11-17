@@ -40,7 +40,8 @@ class	Monster():
 			self.hp = random.randrange(4, 12 + self.level)
 			self.boss = False
 		self.move = True
-		self.state = "{} is looking for a target.".format(self.name)
+		self.state = "looking for a target.".format(self.name)
+		self.target = None
 		self.status = Status()
 		self.random_position_monster()
 			
