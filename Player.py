@@ -18,7 +18,10 @@ import sys
 class	Player(Status):
 
 	def __init__(self, Map):
-		self.name = sys.argv[1]
+		if sys.argv[1]
+			self.name = sys.argv[1]
+		else:
+			self.name = "Shayn"
 		self.skin = "8"
 		self.alive = True
 		

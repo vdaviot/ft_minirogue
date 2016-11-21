@@ -6,6 +6,7 @@ from Player import Player
 from Monster import Monster
 from Monster_table import Monster_table
 from Status import Status
+import sys
 
 class	Main_game():
 
@@ -28,6 +29,7 @@ class	Main_game():
 				self.win.refresh()
 				time.sleep(3)
 				curses.endwin()
+				sys.exit()
 
 			if self.event in [KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT]:
 				self.player.move(self.event)
