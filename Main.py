@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Main.py                                            :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: vdaviot <marvin@42.fr>                     +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2016/11/21 22:23:02 by vdaviot           #+#    #+#              #
+#    Updated: 2016/11/21 22:23:06 by vdaviot          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 #!/usr/bin/python
 import curses, locale, random, time, curses
 from curses import KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT

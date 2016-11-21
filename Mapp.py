@@ -1,4 +1,14 @@
-
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Mapp.py                                            :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: vdaviot <marvin@42.fr>                     +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2016/11/21 22:23:16 by vdaviot           #+#    #+#              #
+#    Updated: 2016/11/21 22:23:20 by vdaviot          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
 class   Map_generator():
 
@@ -42,7 +52,7 @@ class   Map_generator():
         gold = "gold: {}".format(player.gold)
         level = "lvl: {}".format(player.level)
 
-        self.win.addnstr(1, 61, t, len(t), curses.color_pair(1))
+        self.win.addnstr(1, 61, t, len(t))
         self.win.addnstr(2, 61, "Your stats:", len("Your stats:"))
         self.win.addnstr(4, 65, level, len(level))
         self.win.addnstr(5, 65, hp, len(hp))
