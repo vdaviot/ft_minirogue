@@ -18,7 +18,7 @@ import sys
 class	Player(Status):
 
 	def __init__(self, Map):
-		if sys.argv[1]
+		if sys.argv[1]:
 			self.name = sys.argv[1]
 		else:
 			self.name = "Shayn"
@@ -29,7 +29,7 @@ class	Player(Status):
 		self.level = 1
 		self.gold = 0
 		self.armor = 5
-		self.strength = 10
+		self.strength = 11
 		self.dexterity = 8
 		self.precision = 80
 		self.max_precision = 80
