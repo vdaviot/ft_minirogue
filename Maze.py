@@ -37,10 +37,11 @@ class Maze():
 
         self.gen_maze(current_row, current_col)
         self.numtable = [[-1 for j in range(col)] for i in range(row)]
-
+        self.map = self.__str__()
         self.solution_path = []
 
     def __str__(self):
+        # return self.maze
         out_table = '.' + self.col * '_.' + '\n'
         for i in range(self.row):
             out_table += '|'
@@ -50,7 +51,7 @@ class Maze():
                 else:
                     out_table += ' '
                 if self.maze[i][j][RIGHTWALL]:
-                    out_table += '|'
+                    out_table += '#'
                 else:
                     out_table += '.'
             out_table += '\n'
@@ -150,10 +151,6 @@ class Maze():
     def solve_maze(self):
         self.solve_maze_aux(self.start_row, self.startcol, 0)
         self.get_solution_path()
-
-for i in range(10):
-	maze = Maze(random.randrange(5, 20), random.randrange(8, 30))
-	print maze
 
 
 

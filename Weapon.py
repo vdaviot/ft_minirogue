@@ -11,11 +11,13 @@
 # **************************************************************************** #
 
 from faker import Factory
+from Armor import Armor
+import random, locale
 
 class Weapon():
 
 	def __init__(self):
-		fake = Factory.create('fr_FR')
+		fake = Factory.create(random.choice(['de_DE', 'fr_FR', 'nl_NL']))
 		self.old_user = fake.name().split()[0]
 		self.weapon_type = random.choice(["dagger", "sword", "greatsword", "ultra-greatsword", "slingshot", "axe", "great-axe", "cleaver", "hammer", "great-hammer", "knife"])
 		self.damages = random.randrange(5, 20)
@@ -25,7 +27,10 @@ class Weapon():
 		self.rarity = random.randrange(1, 15)
 		self.attribute = self.randomize_attribute()
 		self.weapon_prefix = self.get_rarity_prefixes(self.rarity)
-		self.name = self.assemble_name()
+		self.name = self.assemble_name().encode('utf-8')
+
+	def	__str__(self):
+		return self.name
 
 	def	assemble_name(self):
 		wp = self.weapon_prefix + " " + self.old_user + "'s " + self.weapon_type
@@ -51,3 +56,20 @@ class Weapon():
 			random.randrange(7, 10)
 		if wtype == 4:
 			random.randrange(10, 20)
+
+# locale.setlocale(locale.LC_ALL, 'fr_FR')
+# print("Weapons:\n")
+# for i in range(5):
+# 	wp = Weapon()
+# 	print(wp)
+# 	print("Rarity: ", wp.rarity)
+# 	print("Maniability: ", wp.maniability)
+# 	print("Damages: ", wp.damages)
+# print("\nArmor:\n")
+# for i in range(5):
+# 	ar = Armor()
+# 	print(ar)
+# 	print("Rarity: ", ar.rarity)
+# 	print("durability: ", ar.durability)
+# 	print("armor: ", ar.armor_value)
+# 	print("elemental_resistance: ", ar.elemental_resistance)
