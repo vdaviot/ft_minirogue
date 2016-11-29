@@ -10,66 +10,113 @@
 #                                                                              #
 # **************************************************************************** #
 
-import socket, select, sys, Queue
+import socket, select, sys, types, struct
+from Network import Network
 
 class		Server():
 
 	def	__init__(self, ip, port):
-
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		self.server.setblocking(0)
 		self.server.bind((ip, port))
 		self.server.listen(5)
 		self.inputs = [self.server]
 		self.outputs = []
-		self.messages_queue = {}
+		self.connected_clients = []
+
+		Network.setPlayerNameCallback(self._PlayerNameChanged)
+		Network.setPlayerPositionChangeCallback(self._PlayerPositionChanged)
+
+	def	_removeConnectedClient(self, target):
+		for p in self.connected_clients:
+			if p.socket.fileno() == target.fileno():
+				print "deleted client from list"
+				self.connected_clients.remove(p)
+				self._sendLeavedClient(p.socket, p.id)
+		if target in self.inputs:
+			self.inputs.remove(target)
+		if target in self.outputs:
+			self.outputs.remove(target)
+		target.close()
+
+	def _PlayerNameChanged(self, id, name):
+		print "name: " + name
+		for s in self.connected_clients:
+			if s.id == id:
+				s.name = name
+				self._sendClientNameChanged(s.socket, s.id, name)
+
+	def _PlayerPositionChanged(self, socket, position):
+		print "pos: " + position
+
 
 	def	_waitEvent(self):
 		while self.inputs:
-			print >>sys.stderr, '\nwaiting for the next event'
-			readable, writable, exceptional = select.select(self.inputs, self.outputs, self.inputs)
-			for s in readable:
+			print >>sys.stderr, '\nWaiting for next event.'
+			readableClient, writableClient, exceptional = select.select(self.inputs, self.outputs, self.inputs)
+			for s in readableClient:
 				if s is self.server:
 					connection, client_address = s.accept()
-					print >>sys.stderr, 'new connection from', client_address
-					connection.setblocking(0)
+					print "new client on socket: {}".format(connection.fileno())
+					print >>sys.stderr, 'New player connected from', client_address
 					self.inputs.append(connection)
-					self.messages_queue[connection] = Queue.Queue()
+					obj = ConnectedClient(connection)
+					self.connected_clients.append(obj)
+					Network.SendPlayerID(connection, obj.id)
+					self.outputs.append(s)
+					self._sendClientList(connection)
+					self._sendNewClient(connection)
 				else:
-					data = s.recv(1024)
-					if data:
-						print >>sys.stderr, 'received "%s" from %s' % (data, s.getpeername())
-						self.messages_queue[s].put(data)
-						if s not in self.outputs:
-							self.outputs.append(s)
-					else:
-						print >>sys.stderr, 'closing', client_address, 'after reading no data'
-						if s in self.outputs:
-							self.outputs.remove(s)
-						self.inputs.remove(s)
-						s.close()
-						del self.messages_queue[s]
-			for s in writable:
-				try:
-					next_msg = self.messages_queue[s].get_nowait()
-				except Queue.Empty:
-					print >>sys.stderr, 'output queue for', s.getpeername(), 'is empty'
-					self.outputs.remove(s)
-				else:
-					print >>sys.stderr, 'sending "%s" to %s' % (next_msg, s.getpeername())
-					s.send(next_msg)
-					
+					if Network.Read(s) == False:
+						print >>sys.stderr, 'Player from', client_address, 'disconnected from the game.'
+						self._removeConnectedClient(s)
 			for s in exceptional:
 				print >>sys.stderr, 'handling exceptional condition for', s.getpeername()
-				self.inputs.remove(s)
-				if s in self.outputs:
-					self.outputs.remove(s)
-				s.close()
-				del self.messages_queue[s]
+				self._removeConnectedClient(s)
 
-try:
-	server = Server(sys.argv[1], int(sys.argv[2]))
-	server._waitEvent()
-except:
-	print "\nProgram closed."
+	def	_sendClientList(self, target):
+		toSend = ""
+		for s in self.connected_clients:
+			if s.socket.fileno() != target.fileno():
+				toSend += s.name + "," + struct.pack("i", s.id) + ";"
+		Network.SendMultipleAddPlayer(target, toSend)
+
+	def _sendNewClient(self, connection):
+		for s in self.connected_clients:
+			if s.socket.fileno() != connection.fileno():
+				Network.SendAddPlayer(s.socket, s.id, str(s))
+
+	def _sendLeavedClient(self, connection, id):
+		for s in self.connected_clients:
+			if s.socket.fileno() != connection.fileno():
+				Network.SendLeavedPlayer(s.socket, id)
+
+	def _sendClientNameChanged(self, connection, id, newName):
+		for s in self.connected_clients:
+			if s.socket.fileno() != connection.fileno():
+				Network.SendPlayerName(s.socket, id, newName)
+
+class	ConnectedClient():
+
+	clientID = 0
+
+	def	__init__(self, sock):
+		self.id = ConnectedClient.clientID
+		ConnectedClient.clientID += 1
+		self.name = None
+		self.socket = sock
+
+	def	_setClientName(self, name):
+		self.name = name
+
+	def __str__(self):
+		if self.name == None:
+			return str(self.clientID)
+		else:
+			return self.name
+
+# try:
+server = Server(sys.argv[1], int(sys.argv[2]))
+server._waitEvent()
+# except:
+	# print "\nProgram closed."
