@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-import socket, select, sys, Queue, struct
+import socket, select, sys, Queue, struct, time
 from Network import Network
 
 class	Client():
@@ -29,8 +29,7 @@ class	Client():
 			print "Connected to game server at %d" % self.port
 
 			self.id = Network.GetPlayerID(self.sock)
-
-			print "client id: ", self.id
+			print "Your client id is", self.id
 			Network.SendPlayerName(self.sock, self.id, self.name)
 		except socket.error, e:
 			print "Could not connect to the game server at {} ({}).".format(self.port, e)
@@ -38,10 +37,16 @@ class	Client():
 		self.inputs = [self.sock]
 		self.outputs = []
 
+# CE QUE JE DOIT RECEVOIR DU SERVEUR
 		Network.setPlayerPositionChangeCallback(self._playerPositionChangeCallback)
 		Network.setPlayerAddedCallback(self._playerAddedCallback)
 		Network.setPlayerLeavedCallback(self._playerLeavedCallback)
 		Network.setPlayerNameCallback(self._playerChangeNameCallback)
+		Network.setMapCallback(self._playerAskMap)
+
+	def _playerAskMap(self, id, datas):
+		print "Level map: \n", datas
+		pass
 
 	def _playerPositionChangeCallback(self, id, datas):
 		print "player moved to: ", id, datas
@@ -49,7 +54,8 @@ class	Client():
 
 	def _playerAddedCallback(self, id, datas):
 		print "player joined the game: ", id
-		self.players[id].name = str(id)
+		self.players[id] = {"name":""}
+		self.players[id]["name"] = str(id)
 		pass
 
 	def _playerLeavedCallback(self, id, datas):
@@ -58,21 +64,25 @@ class	Client():
 		pass
 
 	def _playerChangeNameCallback(self, id, datas):
-		print "player ", id, "changed name", datas
-		self.players[id].name = datas
+		self.players[id]["name"] = datas
 		pass
 
 	def	_waitEvent(self):
-		while self.inputs:
-			readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs)
-			if len(readable) != 0:
-				Network.Read(self.sock)
-					# print "Data received from game server: {}".format(data)
-			# if len(writable) != 0:
+		try:
+			while True:
+				try:
+					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs, 1)
+					if len(readable) != 0:
+						Network.Read(self.sock)
+				except select.error, e:
+					print >>sys.stderr, e
+					time.sleep(1)
+					sys.exit(0)
+		except KeyboardInterrupt, e:
+			print >>sys.stderr, e
+			sys.exit(0)
 
-			# 	self.sock.send("{} wrote something to the server.".format(self.name))
 
-
-client = Client(sys.argv[1], "localhost", 4242)
+client = Client(sys.argv[1], sys.argv[2], 4242)
 client._waitEvent()
 

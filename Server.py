@@ -10,12 +10,13 @@
 #                                                                              #
 # **************************************************************************** #
 
-import socket, select, sys, types, struct
+import socket, select, sys, types, struct, time
 from Network import Network
 
 class		Server():
 
 	def	__init__(self, ip, port):
+		Server.map = "  #########\n  #.......#\n  #########\n"
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.server.bind((ip, port))
@@ -24,15 +25,48 @@ class		Server():
 		self.outputs = []
 		self.connected_clients = []
 
+# CE QUE JE DOIT RECEVOIR DES CLIENTS LES BATARDS
 		Network.setPlayerNameCallback(self._PlayerNameChanged)
 		Network.setPlayerPositionChangeCallback(self._PlayerPositionChanged)
+
+	def	_waitEvent(self):
+		while self.inputs:
+			print >>sys.stderr, '\nWaiting for next event.'
+			
+			try:
+				readableClient, writableClient, exceptional = select.select(self.inputs, self.outputs, self.inputs)
+			except KeyboardInterrupt, e:
+				print >>sys.stderr, e, "\nServer disconnected by user. Closing..."
+				time.sleep(1)
+				sys.exit(0)
+
+			for s in readableClient:
+				if s is self.server:
+					connection, client_address = s.accept()
+					print >>sys.stderr, "New client on socket: {}, from {}.".format(connection.fileno(), client_address)
+					self.inputs.append(connection)
+					obj = ConnectedClient(connection)
+					self.connected_clients.append(obj)
+					Network.SendPlayerID(connection, obj.id)
+					self.outputs.append(s)
+					self._sendNewClient(connection, obj)
+					self._sendClientList(connection)
+					self._sendMapClient(connection)
+				else:
+					if Network.Read(s) == False:
+						print >>sys.stderr, 'Player from', client_address, 'disconnected from the game.'
+						self._removeConnectedClient(s)
+
+			for s in exceptional:
+				print >>sys.stderr, 'handling exceptional condition for', s.getpeername()
+				self._removeConnectedClient(s)
+
 
 	def	_removeConnectedClient(self, target):
 		for p in self.connected_clients:
 			if p.socket.fileno() == target.fileno():
-				print "deleted client from list"
 				self.connected_clients.remove(p)
-				self._sendLeavedClient(p.socket, p.id)
+				self._sendClientLeaved(p.socket, p.id)
 		if target in self.inputs:
 			self.inputs.remove(target)
 		if target in self.outputs:
@@ -40,56 +74,39 @@ class		Server():
 		target.close()
 
 	def _PlayerNameChanged(self, id, name):
-		print "name: " + name
+		print "Player {} is now called {}! ".format(id, name)
 		for s in self.connected_clients:
 			if s.id == id:
 				s.name = name
 				self._sendClientNameChanged(s.socket, s.id, name)
 
 	def _PlayerPositionChanged(self, socket, position):
-		print "pos: " + position
+		print "Player on socket: " + position
 
-
-	def	_waitEvent(self):
-		while self.inputs:
-			print >>sys.stderr, '\nWaiting for next event.'
-			readableClient, writableClient, exceptional = select.select(self.inputs, self.outputs, self.inputs)
-			for s in readableClient:
-				if s is self.server:
-					connection, client_address = s.accept()
-					print "new client on socket: {}".format(connection.fileno())
-					print >>sys.stderr, 'New player connected from', client_address
-					self.inputs.append(connection)
-					obj = ConnectedClient(connection)
-					self.connected_clients.append(obj)
-					Network.SendPlayerID(connection, obj.id)
-					self.outputs.append(s)
-					self._sendClientList(connection)
-					self._sendNewClient(connection)
-				else:
-					if Network.Read(s) == False:
-						print >>sys.stderr, 'Player from', client_address, 'disconnected from the game.'
-						self._removeConnectedClient(s)
-			for s in exceptional:
-				print >>sys.stderr, 'handling exceptional condition for', s.getpeername()
-				self._removeConnectedClient(s)
+	def	_sendMapClient(self, target):
+		Network.SendMapPlayer(target, Server.map)
 
 	def	_sendClientList(self, target):
+		print "sended client: "
 		toSend = ""
 		for s in self.connected_clients:
+			print s.name, ":+", s.id
 			if s.socket.fileno() != target.fileno():
-				toSend += s.name + "," + struct.pack("i", s.id) + ";"
+				if s.name:
+					print "name:", s.name, "id:", s.id
+					toSend += s.name + "," + struct.pack("i", s.id) + ";"
 		Network.SendMultipleAddPlayer(target, toSend)
 
-	def _sendNewClient(self, connection):
+	def _sendNewClient(self, target, obj):
 		for s in self.connected_clients:
-			if s.socket.fileno() != connection.fileno():
-				Network.SendAddPlayer(s.socket, s.id, str(s))
+			if s.socket.fileno() != target.fileno():
+				print "sended client id: ", s.id, "to", obj.id
+				Network.SendAddPlayer(s.socket, obj.id, str(obj.id))
 
-	def _sendLeavedClient(self, connection, id):
+	def _sendClientLeaved(self, connection, id):
 		for s in self.connected_clients:
 			if s.socket.fileno() != connection.fileno():
-				Network.SendLeavedPlayer(s.socket, id)
+				Network.SendPlayerLeaved(s.socket, id)
 
 	def _sendClientNameChanged(self, connection, id, newName):
 		for s in self.connected_clients:

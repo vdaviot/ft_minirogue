@@ -19,13 +19,20 @@ class	Network():
 	def __init__(self):
 		Network.callbacks = {}
 
+	# @staticmethod
+	# def	set
+
+	@staticmethod
+	def sendWrapper(socket, cmd, id, message):
+		socket.send(cmd + struct.pack("i", id) + message + "\x99")
+
 	@staticmethod
 	def setPlayerPositionChangeCallback(callback):
 		Network.callbacks["PP"] = callback
 
 	@staticmethod
 	def SendPlayerPosition(targetSocket, id, position):
-		targetSocket.send("PP" + struct.pack("i", id) + str(position))
+		Network.sendWrapper(targetSocket, "PP", id, str(position))
 
 	@staticmethod
 	def setPlayerNameCallback(callback):
@@ -33,15 +40,18 @@ class	Network():
 
 	@staticmethod
 	def SendPlayerName(targetSocket, id, name):
-		targetSocket.send("NA" + struct.pack("i", id) + name)
+		Network.sendWrapper(targetSocket, "NA", id, name)
 
 	@staticmethod
 	def setPlayerLeavedCallback(callback):
-		Network.callbacks["LP"] = callback
+		Network.callbacks["PL"] = callback
 
 	@staticmethod
-	def SendLeavedPlayer(targetSocket, id):
-		targetSocket.send("LP" + struct.pack("i", id))
+	def SendPlayerLeaved(targetSocket, id):
+		try:
+			Network.sendWrapper(targetSocket, "PL", id, "")
+		except socket.error as e:
+			print >>sys.stderr, e
 
 	@staticmethod
 	def setPlayerAddedCallback(callback):
@@ -53,12 +63,11 @@ class	Network():
 
 	@staticmethod
 	def SendMultipleAddPlayer(targetSocket, players):
-		targetSocket.send("AP" + "BBBB" + players)
+		Network.sendWrapper(targetSocket, "AP", -1, players)
 
 	@staticmethod
 	def SendPlayerID(targetSocket, id):
-		print "sended id: ", id
-		targetSocket.send("ID" + struct.pack("i", int(id)))
+		Network.sendWrapper(targetSocket, "ID", id, "")
 
 	@staticmethod
 	def GetPlayerID(targetSocket):
@@ -66,30 +75,44 @@ class	Network():
 		ret = targetSocket.recv(4)
 		return struct.unpack("i", ret)[0]
 
+	@staticmethod
+	def	setMapCallback(callback):
+		Network.callbacks["MA"] = callback
+
+	@staticmethod
+	def	SendMapPlayer(targetSocket, map):
+		print map
+		Network.sendWrapper(targetSocket, "MA", -1, map)
 
 	@staticmethod
 	def Read(targetSocket):
-		try:
-			key = targetSocket.recv(2)
-			if not key:
-				return False
-			print "key = " + key
-			strid = targetSocket.recv(4)
-			print "str id = " + strid
-			id = struct.unpack("i", strid)[0]
-			datas = targetSocket.recv(1024)
+		# try:
+			datas = targetSocket.recv(4096)
 			if not datas:
 				return False
-			print >>sys.stderr, 'New message: "{}" from {}'.format(datas, targetSocket.getpeername())
-			if key == "AP":
-				for players in datas.split(';'):
-					if players == "":
-						continue
-					playerName = players.split(',')[0]
-					id = struct.unpack("i", players.split(',')[1])[0]
-					Network.callbacks[key](id, playerName)
-			else:
-				Network.callbacks[key](id, datas)
+
+			cmds = datas.split('\x99')
+			print cmds
+			for cmd in cmds:
+				key = cmd[:2]
+				if not key:
+					print "not key"
+					continue
+				strid = cmd[2:6]
+				id = struct.unpack("i", strid)[0]
+
+				cmd = cmd[6:]
+				print "cmd: ", cmd
+				if key == "AP":
+					for players in cmd.split(';'):
+						if players == "":
+							continue
+						playerName = players.split(',')[0]
+						id = struct.unpack("i", players.split(',')[1])[0]
+						print "unpacked id: ", id;
+						Network.callbacks[key](id, playerName)
+				else:
+					Network.callbacks[key](id, cmd)
 			return True
-		except:
+		# except e:
 			return False
