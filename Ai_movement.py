@@ -12,7 +12,7 @@
 
 import random
 
-class	Ai_movement(Map_generator):
+class	Ai_movement():
 
 	def	__init__(self, entity, mapp):
 		self.map = mapp
@@ -25,13 +25,13 @@ class	Ai_movement(Map_generator):
 
 	def	handle_movement(self):
 		if self.attitude == "idle":
-			self.idle()
+			self.idleBehavior()
 		elif self.attitude == "attack" or self.los == True:
-			self.attack()
+			self.attackBehavior()
 		elif self.attitude == "escape"
-			self.escape()
+			self.escapeBehavior()
 
-	def idle(self):
+	def idleBehavior(self):
 		found = False
 		while found == False and self.target == None:
 			px, py = self.posX, self.posY
@@ -53,13 +53,13 @@ class	Ai_movement(Map_generator):
 				found = True
 
 
-	def attack(self, player_x, player_y):
+	def attackBehavior(self, player_x, player_y):
 		pass
 
-	def escape(self, player_x, player_y):
+	def escapeBehavior(self, player_x, player_y):
 		pass
 
 	def	check_case(self, x, y):
 		if(x >= 0 and y >= 0 and x < len(self.Map.map[0]) and y < len(self.Map.map) and (self.Map.map[y][x] in '.+-')):
 			self.posX = x
-			self.posy
+			self.posy = y

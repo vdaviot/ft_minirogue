@@ -18,10 +18,10 @@ from Status import Status
 BOSS_SUFFIX = [", the One Legged", ", the Mad Scientist", ", the Abobination", ", the Sinful", ", the Giant", ", the Lost", ", the Fallen", ", the Archangel", ", the Juggernaut", ", the Dreadful", ", the Ivory King", 
 ", the God of all Things", ", the Unstoppable", ", the Green", ", the Unborn", ", the Eternal", ", the Follower", ", the Corruptor", ", the Flesheater", ", the Maneater", ", the Bonehunter", ", Lord of the Lost Souls", ", Master of the Pit", ", the Tainted Soul", ", the Immaterial"]
 BOSS_PREFIX = []
-
 MONSTER_NAME = []
 MONSTER_SUFIX = []
 MONSTER_PREFIX = []
+
 class	Monster():
 
 	def	__init__(self, mapp, one=0):
@@ -54,7 +54,7 @@ class	Monster():
 
 	def	generate_bossname(self, generator):
 		name = generator.name().split()[0]
-		suffix = random.choice([", the one legged", ", the mad scientist", ", the abobination", ", the sinful", ", the giant", ", the lost", ", the fallen", ", the archangel"])
+		suffix = random.choice(BOSS_SUFFIX)
 		prefix = random.choice(["Old ", "Sadic ", "", "", "Father ", ])
 		return prefix + name + suffix
 

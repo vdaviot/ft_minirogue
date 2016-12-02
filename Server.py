@@ -16,7 +16,7 @@ from Network import Network
 class		Server():
 
 	def	__init__(self, ip, port):
-		Server.map = "  #########\n  #.......#\n  #########\n"
+		Server.map = "#########\n#.......#\n#########\n"
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.server.bind((ip, port))
@@ -25,7 +25,7 @@ class		Server():
 		self.outputs = []
 		self.connected_clients = []
 
-# CE QUE JE DOIT RECEVOIR DES CLIENTS LES BATARDS
+		# CE QUE JE DOIT RECEVOIR DES CLIENTS LES BATARDS
 		Network.setPlayerNameCallback(self._PlayerNameChanged)
 		Network.setPlayerPositionChangeCallback(self._PlayerPositionChanged)
 
@@ -87,20 +87,19 @@ class		Server():
 		Network.SendMapPlayer(target, Server.map)
 
 	def	_sendClientList(self, target):
-		print "sended client: "
 		toSend = ""
 		for s in self.connected_clients:
 			print s.name, ":+", s.id
 			if s.socket.fileno() != target.fileno():
 				if s.name:
-					print "name:", s.name, "id:", s.id
+					# print "name:", s.name, "id:", s.id
 					toSend += s.name + "," + struct.pack("i", s.id) + ";"
 		Network.SendMultipleAddPlayer(target, toSend)
 
 	def _sendNewClient(self, target, obj):
 		for s in self.connected_clients:
 			if s.socket.fileno() != target.fileno():
-				print "sended client id: ", s.id, "to", obj.id
+				# print "sended client id: ", s.id, "to", obj.id
 				Network.SendAddPlayer(s.socket, obj.id, str(obj.id))
 
 	def _sendClientLeaved(self, connection, id):

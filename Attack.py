@@ -17,6 +17,7 @@ class	Attack():
 		self.weapon = weapon
 		self.damages = self.potential_damages()
 		self.precision = self.potential_precision()
+		self.attack_counter = round(self.precision / 100) if > 1 else 1
 
 	def	potential_damages(self):
 		return int(self.weapon.damages * (self.entity.strength / 3))

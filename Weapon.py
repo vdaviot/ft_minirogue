@@ -11,7 +11,6 @@
 # **************************************************************************** #
 
 from faker import Factory
-from Armor import Armor
 import random, locale
 
 class Weapon():

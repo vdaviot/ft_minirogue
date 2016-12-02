@@ -27,7 +27,6 @@ class	Client():
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.sock.connect((host, self.port))
 			print "Connected to game server at %d" % self.port
-
 			self.id = Network.GetPlayerID(self.sock)
 			print "Your client id is", self.id
 			Network.SendPlayerName(self.sock, self.id, self.name)
@@ -37,7 +36,7 @@ class	Client():
 		self.inputs = [self.sock]
 		self.outputs = []
 
-# CE QUE JE DOIT RECEVOIR DU SERVEUR
+		# CE QUE JE DOIT RECEVOIR DU SERVEUR
 		Network.setPlayerPositionChangeCallback(self._playerPositionChangeCallback)
 		Network.setPlayerAddedCallback(self._playerAddedCallback)
 		Network.setPlayerLeavedCallback(self._playerLeavedCallback)

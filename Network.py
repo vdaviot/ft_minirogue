@@ -19,9 +19,6 @@ class	Network():
 	def __init__(self):
 		Network.callbacks = {}
 
-	# @staticmethod
-	# def	set
-
 	@staticmethod
 	def sendWrapper(socket, cmd, id, message):
 		socket.send(cmd + struct.pack("i", id) + message + "\x99")
@@ -81,38 +78,32 @@ class	Network():
 
 	@staticmethod
 	def	SendMapPlayer(targetSocket, map):
-		print map
 		Network.sendWrapper(targetSocket, "MA", -1, map)
 
 	@staticmethod
 	def Read(targetSocket):
-		# try:
+		try:
 			datas = targetSocket.recv(4096)
 			if not datas:
 				return False
-
 			cmds = datas.split('\x99')
 			print cmds
 			for cmd in cmds:
 				key = cmd[:2]
 				if not key:
-					print "not key"
 					continue
 				strid = cmd[2:6]
 				id = struct.unpack("i", strid)[0]
-
 				cmd = cmd[6:]
-				print "cmd: ", cmd
 				if key == "AP":
 					for players in cmd.split(';'):
 						if players == "":
 							continue
 						playerName = players.split(',')[0]
 						id = struct.unpack("i", players.split(',')[1])[0]
-						print "unpacked id: ", id;
 						Network.callbacks[key](id, playerName)
 				else:
 					Network.callbacks[key](id, cmd)
 			return True
-		# except e:
+		except:
 			return False
