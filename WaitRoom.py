@@ -10,4 +10,19 @@
 #                                                                              #
 # **************************************************************************** #
 
+class WaitRoom():
 
+	def __init__(self):
+		self.map =  "##########\n"
+		self.map += "#........#\n"
+		self.map += "#........#\n"
+		self.map += "#........#\n"
+		self.map += "#........#\n"
+		self.map += "#........#\n"
+		self.map += "#........#\n"
+		self.map += "#........#\n"
+		self.map += "#........#\n"
+		self.map += "##########\n"
+	
+	def	__str__(self):
+		return self.map

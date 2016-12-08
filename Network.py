@@ -20,28 +20,36 @@ class	Network():
 		Network.callbacks = {}
 
 	@staticmethod
-	def sendWrapper(socket, cmd, id, message):
-		socket.send(cmd + struct.pack("i", id) + message + "\x99")
-
-	@staticmethod
 	def setPlayerPositionChangeCallback(callback):
 		Network.callbacks["PP"] = callback
+	
+	@staticmethod
+	def setPlayerNameCallback(callback):
+		Network.callbacks["NA"] = callback
+
+	@staticmethod
+	def setPlayerLeavedCallback(callback):
+		Network.callbacks["PL"] = callback
+
+	@staticmethod
+	def setPlayerAddedCallback(callback):
+		Network.callbacks["AP"] = callback
+
+	@staticmethod
+	def	setMapCallback(callback):
+		Network.callbacks["MA"] = callback
+
+	@staticmethod
+	def sendWrapper(socket, cmd, id, message):
+		socket.send(cmd + struct.pack("i", id) + message + "\x99")
 
 	@staticmethod
 	def SendPlayerPosition(targetSocket, id, position):
 		Network.sendWrapper(targetSocket, "PP", id, str(position))
 
 	@staticmethod
-	def setPlayerNameCallback(callback):
-		Network.callbacks["NA"] = callback
-
-	@staticmethod
 	def SendPlayerName(targetSocket, id, name):
 		Network.sendWrapper(targetSocket, "NA", id, name)
-
-	@staticmethod
-	def setPlayerLeavedCallback(callback):
-		Network.callbacks["PL"] = callback
 
 	@staticmethod
 	def SendPlayerLeaved(targetSocket, id):
@@ -49,10 +57,6 @@ class	Network():
 			Network.sendWrapper(targetSocket, "PL", id, "")
 		except socket.error as e:
 			print >>sys.stderr, e
-
-	@staticmethod
-	def setPlayerAddedCallback(callback):
-		Network.callbacks["AP"] = callback
 
 	@staticmethod
 	def SendAddPlayer(targetSocket, id, name):
@@ -72,9 +76,6 @@ class	Network():
 		ret = targetSocket.recv(4)
 		return struct.unpack("i", ret)[0]
 
-	@staticmethod
-	def	setMapCallback(callback):
-		Network.callbacks["MA"] = callback
 
 	@staticmethod
 	def	SendMapPlayer(targetSocket, map):
@@ -82,28 +83,25 @@ class	Network():
 
 	@staticmethod
 	def Read(targetSocket):
-		try:
-			datas = targetSocket.recv(4096)
-			if not datas:
-				return False
-			cmds = datas.split('\x99')
-			print cmds
-			for cmd in cmds:
-				key = cmd[:2]
-				if not key:
-					continue
-				strid = cmd[2:6]
-				id = struct.unpack("i", strid)[0]
-				cmd = cmd[6:]
-				if key == "AP":
-					for players in cmd.split(';'):
-						if players == "":
-							continue
-						playerName = players.split(',')[0]
-						id = struct.unpack("i", players.split(',')[1])[0]
-						Network.callbacks[key](id, playerName)
-				else:
-					Network.callbacks[key](id, cmd)
-			return True
-		except:
+		datas = targetSocket.recv(4096)
+		if not datas:
 			return False
+		cmds = datas.split('\x99')
+		print cmds
+		for cmd in cmds:
+			key = cmd[:2]
+			if not key:
+				continue
+			strid = cmd[2:6]
+			id = struct.unpack("i", strid)[0]
+			cmd = cmd[6:]
+			if key == "AP":
+				for players in cmd.split(';'):
+					if players == "":
+						continue
+					playerName = players.split(',')[0]
+					id = struct.unpack("i", players.split(',')[1])[0]
+					Network.callbacks[key](id, playerName)
+			else:
+				Network.callbacks[key](id, cmd)
+		return True

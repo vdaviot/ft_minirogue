@@ -15,8 +15,8 @@ from Network import Network
 
 class		Server():
 
-	def	__init__(self, ip, port):
-		Server.map = "#########\n#.......#\n#########\n"
+	def	__init__(self, ip, port, map):
+		Server.map = map
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.server.bind((ip, port))
@@ -32,7 +32,6 @@ class		Server():
 	def	_waitEvent(self):
 		while self.inputs:
 			print >>sys.stderr, '\nWaiting for next event.'
-			
 			try:
 				readableClient, writableClient, exceptional = select.select(self.inputs, self.outputs, self.inputs)
 			except KeyboardInterrupt, e:
@@ -61,7 +60,6 @@ class		Server():
 				print >>sys.stderr, 'handling exceptional condition for', s.getpeername()
 				self._removeConnectedClient(s)
 
-
 	def	_removeConnectedClient(self, target):
 		for p in self.connected_clients:
 			if p.socket.fileno() == target.fileno():
@@ -80,8 +78,11 @@ class		Server():
 				s.name = name
 				self._sendClientNameChanged(s.socket, s.id, name)
 
-	def _PlayerPositionChanged(self, socket, position):
-		print "Player on socket: " + position
+	def _PlayerPositionChanged(self, id, position):
+		for s in self.connected_clients:
+			if s.id == id:
+				s.posX = int(position.split(":")[0])
+				s.posY = int(position.split(":")[1])
 
 	def	_sendMapClient(self, target):
 		Network.SendMapPlayer(target, Server.map)
@@ -89,17 +90,14 @@ class		Server():
 	def	_sendClientList(self, target):
 		toSend = ""
 		for s in self.connected_clients:
-			print s.name, ":+", s.id
 			if s.socket.fileno() != target.fileno():
 				if s.name:
-					# print "name:", s.name, "id:", s.id
 					toSend += s.name + "," + struct.pack("i", s.id) + ";"
 		Network.SendMultipleAddPlayer(target, toSend)
 
 	def _sendNewClient(self, target, obj):
 		for s in self.connected_clients:
 			if s.socket.fileno() != target.fileno():
-				# print "sended client id: ", s.id, "to", obj.id
 				Network.SendAddPlayer(s.socket, obj.id, str(obj.id))
 
 	def _sendClientLeaved(self, connection, id):
@@ -120,10 +118,9 @@ class	ConnectedClient():
 		self.id = ConnectedClient.clientID
 		ConnectedClient.clientID += 1
 		self.name = None
+		self.posX = 1
+		self.posY = 1
 		self.socket = sock
-
-	def	_setClientName(self, name):
-		self.name = name
 
 	def __str__(self):
 		if self.name == None:
@@ -131,8 +128,5 @@ class	ConnectedClient():
 		else:
 			return self.name
 
-# try:
-server = Server(sys.argv[1], int(sys.argv[2]))
-server._waitEvent()
-# except:
-	# print "\nProgram closed."
+	def	_setClientName(self, name):
+		self.name = name
