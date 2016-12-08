@@ -152,6 +152,11 @@ class Maze():
         self.solve_maze_aux(self.start_row, self.startcol, 0)
         self.get_solution_path()
 
+for i in range(10):
+    maze = Maze(15, 15)
+    print maze
+    del maze
+
 
 
 

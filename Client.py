@@ -77,9 +77,9 @@ class	Client():
 	def	_waitEvent(self):
 		try:
 			while True:
-				self._executeWinActions(self.win._run())
+				self._executeWinActions(self.win._run())#A modif
 				try:
-					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs, 0.01)
+					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs) #rajouter 0.01 si jamais bug
 					if len(readable) != 0:
 						if Network.Read(self.sock) == False:
 							print >>sys.stderr, "Server Disconnected, exiting.."

@@ -158,8 +158,9 @@ class Cellar_automata():
 # for i in range(9):
 	# print
 	# print("map {}:").format(i + 1)
-# ca = Cellar_automata(random.randrange(10, 40), random.randrange(10, 40), random.uniform(0.40, 0.50))
-# ca.generate_definitive_map()
+ca = Cellar_automata(random.randrange(10, 40), random.randrange(10, 40), random.uniform(0.40, 0.50))
+ca.generate_definitive_map()
+print ca
 
 
 
