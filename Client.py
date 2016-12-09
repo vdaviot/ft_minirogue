@@ -16,7 +16,7 @@ from Win import Win
 
 class	Client():
 
-	players		= {}
+	players	= {}
 	posX = 1
 	posY = 1
 
@@ -68,23 +68,20 @@ class	Client():
 	def _playerLeavedCallback(self, id, datas):
 		print "player disconnected:", id
 		del self.players[id]
-		pass
 
 	def _playerChangeNameCallback(self, id, datas):
 		self.players[id]["name"] = datas
-		pass
 
 	def	_waitEvent(self):
 		try:
 			while True:
-				self._executeWinActions(self.win._run())#A modif
+				self._executeWinActions(self.win._nextTurn())#A modif
 				try:
-					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs) #rajouter 0.01 si jamais bug
+					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs, 0.01) #rajouter 0.01 si jamais bug
 					if len(readable) != 0:
 						if Network.Read(self.sock) == False:
 							print >>sys.stderr, "Server Disconnected, exiting.."
 							sys.exit(0)
-
 				except select.error, e:
 					print >>sys.stderr, e
 					time.sleep(1)
@@ -102,6 +99,9 @@ class	Client():
 			self.posY -= 1
 		elif action == 260:
 			self.posX -= 1
+		elif action == 127:
+			self.win.endwin()
+			sys.exit(0)
 		else:
 			return False
 		Network.SendPlayerPosition(self.sock, self.id, str(self.posX) + ":" + str(self.posY))

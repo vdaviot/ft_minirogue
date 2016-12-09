@@ -29,20 +29,9 @@ class	Win():
 		self.run = True
 		self.event = None
 
-	def	_run(self):
-		self.event = self.win.getch()
-		if self.event == DEL:
-			self.run == False
-			self.win.endwin()
-			sys.exit(0)
-		elif self.event == UP:
-			return UP
-		elif self.event == DOWN:
-			return DOWN
-		elif self.event == LEFT:
-			return LEFT
-		elif self.event == RIGHT:
-			return RIGHT
-		self.win.clear()
-		self.win.refresh()
+	def	__str__(self):
+		return "Win:\n\t" + "row: {}\n\t".format(self.row) + "col: {}\n".format(self.col)
+	def	_nextTurn(self):
+		return self.win.getch()
+
 

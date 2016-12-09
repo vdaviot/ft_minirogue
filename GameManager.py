@@ -16,11 +16,13 @@ import socket, select, sys, types, struct, time
 
 class		GameManager():
 
-	def	__init__(self, name="Shayn's server", addr="localhost", port=4242):
+	def	__init__(self, name="Shayn's server", addr="localhost", port=4242, difficulty=2, lenght=10):
 
 		self.waitRoom = WaitRoom()
 		self.server = Server(addr, port, self.waitRoom.map)
-		# self.level = Level()
+		self.gameLevel = []
+		for i in range(lenght)
+			self.gameLevel.append(Level(i, difficulty))
 		self.nLevel = 1
 		# self.main_player = PlayerCreation()
 		self.player = []
