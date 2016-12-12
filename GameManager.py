@@ -21,9 +21,10 @@ class		GameManager():
 		self.waitRoom = WaitRoom()
 		self.server = Server(addr, port, self.waitRoom.map)
 		self.gameLevel = []
-		for i in range(lenght)
-			self.gameLevel.append(Level(i, difficulty))
+		# for i in range(lenght):
+			# self.gameLevel.append(Level(i, difficulty))
 		self.nLevel = 1
+		self.turn = 1
 		# self.main_player = PlayerCreation()
 		self.player = []
 

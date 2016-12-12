@@ -17,6 +17,7 @@ class		Server():
 
 	def	__init__(self, ip, port, map):
 		Server.map = map
+		self.turn = 0
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.server.bind((ip, port))
@@ -28,6 +29,7 @@ class		Server():
 		# CE QUE JE DOIT RECEVOIR DES CLIENTS LES BATARDS
 		Network.setPlayerNameCallback(self._PlayerNameChanged)
 		Network.setPlayerPositionChangeCallback(self._PlayerPositionChanged)
+		Network.setPlayerSpawningPositionCallback(self._playerSpawningPosition)
 
 	def	_waitEvent(self):
 		while self.inputs:
@@ -55,10 +57,24 @@ class		Server():
 					if Network.Read(s) == False:
 						print >>sys.stderr, 'Player from', client_address, 'disconnected from the game.'
 						self._removeConnectedClient(s)
-
 			for s in exceptional:
 				print >>sys.stderr, 'handling exceptional condition for', s.getpeername()
 				self._removeConnectedClient(s)
+			self._playerHavePlayed(None, None)
+
+	def	_playerHavePlayed(self, id, action):
+		i = 0
+		for client in self.connected_clients:
+			if client.wait == True:
+				i += 1
+		if i == len(self.connected_clients):
+			print "All player have played!"
+			self.turn += 1
+			for s in self.connected_clients:
+				s.wait = False
+				Network.sendNextTurnPlayer(s.socket, s.id, str(self.turn))
+				Network.sendPlayerLetsPlay(s.socket, s.id, str(self.turn))
+				self._sendMapClient(s.socket)
 
 	def	_removeConnectedClient(self, target):
 		for p in self.connected_clients:
@@ -78,9 +94,16 @@ class		Server():
 				s.name = name
 				self._sendClientNameChanged(s.socket, s.id, name)
 
-	def _PlayerPositionChanged(self, id, position):
+	def	_playerSpawningPosition(self, id, position):
 		for s in self.connected_clients:
 			if s.id == id:
+				s.posX = int(position.split(":")[0])
+				s.posY = int(position.split(":")[1])
+
+	def _PlayerPositionChanged(self, id, position):
+		for s in self.connected_clients:
+			if s.id == id and s.wait == False:
+				s.wait = True
 				s.posX = int(position.split(":")[0])
 				s.posY = int(position.split(":")[1])
 
@@ -117,16 +140,16 @@ class	ConnectedClient():
 	def	__init__(self, sock):
 		self.id = ConnectedClient.clientID
 		ConnectedClient.clientID += 1
+		self.wait = False
 		self.name = None
 		self.posX = 1
 		self.posY = 1
 		self.socket = sock
 
 	def __str__(self):
-		if self.name == None:
-			return str(self.clientID)
-		else:
-			return self.name
+		msg = str(self.id) + " should wait?: {}".format(self.wait)
+		return msg
+
 
 	def	_setClientName(self, name):
 		self.name = name

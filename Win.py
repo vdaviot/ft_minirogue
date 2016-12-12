@@ -31,6 +31,7 @@ class	Win():
 
 	def	__str__(self):
 		return "Win:\n\t" + "row: {}\n\t".format(self.row) + "col: {}\n".format(self.col)
+		
 	def	_nextTurn(self):
 		return self.win.getch()
 

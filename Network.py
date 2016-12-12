@@ -22,10 +22,26 @@ class	Network():
 	@staticmethod
 	def setPlayerPositionChangeCallback(callback):
 		Network.callbacks["PP"] = callback
-	
+
+	@staticmethod
+	def	setPlayerLetsPlay(callback):
+		Network.callbacks["LP"] = callback
+
+	@staticmethod
+	def	setPlayerSpawningPositionCallback(callback):
+		Network.callbacks["SP"] = callback
+
+	@staticmethod
+	def	setNextTurn(callback):
+		Network.callbacks["NT"] = callback
+
 	@staticmethod
 	def setPlayerNameCallback(callback):
 		Network.callbacks["NA"] = callback
+
+	@staticmethod
+	def	setPlayerChoosedAction(callback):
+		Network.callbacks["CA"] = callback
 
 	@staticmethod
 	def setPlayerLeavedCallback(callback):
@@ -36,22 +52,46 @@ class	Network():
 		Network.callbacks["AP"] = callback
 
 	@staticmethod
+	def	setPlayerIdCallback(callback):
+		Network.callbacks["ID"] = callback
+
+	@staticmethod
 	def	setMapCallback(callback):
 		Network.callbacks["MA"] = callback
 
 	@staticmethod
+	def	setPlayerIdCallback(callback):
+		Network.callbacks["ID"] = callback
+
+	@staticmethod # SP Player spawning position
+	def	sendPlayerSpawningPosition(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "SP", id, action)
+
+	@staticmethod # LP Player can play
+	def	sendPlayerLetsPlay(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "LP", id, action)
+
+	@staticmethod # CA Player has choosed an action
+	def	sendPlayerChoosedAction(targetSocket, id, action): 
+		Network.sendWrapper(targetSocket, "CA", id, action)
+
+	@staticmethod # NT Player Next Turn
+	def	sendNextTurnPlayer(targetSocket, id, message):
+		Network.sendWrapper(targetSocket, "NT", id, message)
+
+	@staticmethod # Wrapper to send nicely formatted messages
 	def sendWrapper(socket, cmd, id, message):
 		socket.send(cmd + struct.pack("i", id) + message + "\x99")
 
-	@staticmethod
+	@staticmethod # PP Player position
 	def SendPlayerPosition(targetSocket, id, position):
 		Network.sendWrapper(targetSocket, "PP", id, str(position))
 
-	@staticmethod
+	@staticmethod # NA Player name
 	def SendPlayerName(targetSocket, id, name):
 		Network.sendWrapper(targetSocket, "NA", id, name)
 
-	@staticmethod
+	@staticmethod # PL Player leaved
 	def SendPlayerLeaved(targetSocket, id):
 		try:
 			Network.sendWrapper(targetSocket, "PL", id, "")
@@ -62,11 +102,11 @@ class	Network():
 	def SendAddPlayer(targetSocket, id, name):
 		Network.SendMultipleAddPlayer(targetSocket, name + "," + struct.pack("i", id) + ";")
 
-	@staticmethod
+	@staticmethod # AP Added player
 	def SendMultipleAddPlayer(targetSocket, players):
 		Network.sendWrapper(targetSocket, "AP", -1, players)
 
-	@staticmethod
+	@staticmethod # ID Player id
 	def SendPlayerID(targetSocket, id):
 		Network.sendWrapper(targetSocket, "ID", id, "")
 
@@ -76,8 +116,7 @@ class	Network():
 		ret = targetSocket.recv(4)
 		return struct.unpack("i", ret)[0]
 
-
-	@staticmethod
+	@staticmethod # MA Map 
 	def	SendMapPlayer(targetSocket, map):
 		Network.sendWrapper(targetSocket, "MA", -1, map)
 

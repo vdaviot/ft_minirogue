@@ -14,6 +14,12 @@ import socket, select, sys, Queue, struct, time, random
 from Network import Network
 from Win import Win
 
+UP = 259
+RIGHT = 261
+DOWN = 258
+LEFT = 260
+DEL = 127
+
 class	Client():
 
 	players	= {}
@@ -23,21 +29,21 @@ class	Client():
 	def	__init__(self, name, host, port=4242):
 		self.name = name
 		self.win = Win(400, 400)
-		self.posX = random.randrange(1, 9)
-		self.posY = random.randrange(1, 9)
-		print self.posX, self.posY
+		self.posY = random.randrange(1, 8)
+		self.posX = random.randrange(1, 8)
 		self.host = host
 		self.port = int(port)
 		self.addr = host + ':' + str(port)
-		self.id = 0
+		self.turn = 0
+		self.wait = False
 		try:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.sock.connect((host, self.port))
 			print "Connected to game server at %d" % self.port
 			self.id = Network.GetPlayerID(self.sock)
-			print "Your client id is", self.id
+			self.win.win.addnstr(24, 0, str(self.id), len(str(self.id)))
 			Network.SendPlayerName(self.sock, self.id, self.name)
-			Network.SendPlayerPosition(self.sock, self.id,str(self.posX) + ":" + str(self.posY))
+			Network.sendPlayerSpawningPosition(self.sock, self.id, str(self.posX) + ":" + str(self.posY))
 		except socket.error, e:
 			print "Could not connect to the game server at {} ({}).".format(self.port, e)
 			sys.exit(1)
@@ -45,28 +51,48 @@ class	Client():
 		self.outputs = []
 
 		# CE QUE JE DOIT RECEVOIR DU SERVEUR
-		Network.setPlayerPositionChangeCallback(self._playerPositionChangeCallback)
 		Network.setPlayerAddedCallback(self._playerAddedCallback)
 		Network.setPlayerLeavedCallback(self._playerLeavedCallback)
 		Network.setPlayerNameCallback(self._playerChangeNameCallback)
 		Network.setMapCallback(self._playerAskMap)
+		Network.setNextTurn(self._playerGetNextTurn)
+		Network.setPlayerLetsPlay(self._playerLetsPlay)
+	
+	def	_playerGetNextTurn(self, id, datas):
+		self.turn = int(datas)
+		self.win.win.addnstr(21, 0, "Next turn incomming! ({})".format(self.turn), len("Next turn incomming! ({})".format(self.turn)))
+		self.win.win.refresh()
+
+	def	_playerLetsPlay(self, id, datas):
+		if self.wait == False:
+			self.win.win.addnstr(22, 0, "It's your TURN!", len("It's your TURN!"))
+		self.win.win.refresh()
+		self.wait = False
 
 	def _playerAskMap(self, id, datas):
-		print "Level map: \n", datas
-		pass
+		self.win.win.addnstr(0, 0, datas, len(datas))
+		self.win.win.addnstr(self.posX, self.posY, str(self.id), len(str(self.id)))
+		self.win.win.refresh()
 
 	def _playerPositionChangeCallback(self, id, datas):
-		print "player moved to: ", id, datas
-		pass
+		msg = "id: {} && self.id: {}".format(id, self.id)
+		self.win.win.addnstr(26, 0, msg, len(msg))
+		if id == self.id:
+			# msg = "Player moved to " + datas
+			self.wait = True
+			self.win.win.refresh()
 
 	def _playerAddedCallback(self, id, datas):
-		print "player joined the game: ", id
+		msg = "player joined the game: " + str(id)
+		self.win.win.addnstr(20, 0, msg, len(msg))
 		self.players[id] = {"name":""}
 		self.players[id]["name"] = str(id)
-		pass
+		self.win.win.refresh()
 
 	def _playerLeavedCallback(self, id, datas):
-		print "player disconnected:", id
+		msg = "Player {} disconnected.".format(id)
+		self.win.win.addnstr(22, 0, msg, len(msg))
+		self.win.win.refresh()
 		del self.players[id]
 
 	def _playerChangeNameCallback(self, id, datas):
@@ -75,13 +101,16 @@ class	Client():
 	def	_waitEvent(self):
 		try:
 			while True:
-				self._executeWinActions(self.win._nextTurn())#A modif
 				try:
-					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs, 0.01) #rajouter 0.01 si jamais bug
+					self.win.win.clear()
+					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs)
 					if len(readable) != 0:
 						if Network.Read(self.sock) == False:
 							print >>sys.stderr, "Server Disconnected, exiting.."
 							sys.exit(0)
+						else:
+							if self.wait == False:
+								self._executeWinActions(self.win._nextTurn())
 				except select.error, e:
 					print >>sys.stderr, e
 					time.sleep(1)
@@ -91,20 +120,24 @@ class	Client():
 			sys.exit(0)
 
 	def	_executeWinActions(self, action):
-		if action == 259:
-			self.posY += 1
-		elif action == 261:
-			self.posX += 1
-		elif action == 258:
-			self.posY -= 1
-		elif action == 260:
-			self.posX -= 1
-		elif action == 127:
-			self.win.endwin()
-			sys.exit(0)
-		else:
+		self.win.win.addnstr(20, 0, str(self.wait), len(str(self.wait)))
+		if self.wait == True:
 			return False
+		else:
+			if action == LEFT:
+				self.posY -= 1
+			elif action == DOWN:
+				self.posX += 1
+			elif action == RIGHT:
+				self.posY += 1
+			elif action == UP:
+				self.posX -= 1
+			elif action == 127:
+				self.win.endwin()
+				sys.exit(0)
+		self.wait = True
 		Network.SendPlayerPosition(self.sock, self.id, str(self.posX) + ":" + str(self.posY))
+		self.win.win.refresh()
 
 client = Client(sys.argv[1], sys.argv[2], 4242)
 client._waitEvent()
