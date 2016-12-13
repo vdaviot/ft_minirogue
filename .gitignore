@@ -1,5 +1,7 @@
 tests/
 ft_minirogue.pdf
+*.un~
+.DS_Store
 *.pyc
 __pycache__/
 __pycache__
