@@ -13,16 +13,22 @@
 class WaitRoom():
 
 	def __init__(self):
-		self.map =  "##########\n"
-		self.map += "#........#\n"
-		self.map += "#........#\n"
-		self.map += "#........#\n"
-		self.map += "#........#\n"
-		self.map += "#........#\n"
-		self.map += "#........#\n"
-		self.map += "#........#\n"
-		self.map += "#........#\n"
-		self.map += "##########\n"
+		self.room = []
+		self.room.append("##########\n")
+		self.row = len(self.room[0]) - 1
+		self.room.append("#........#\n")
+		self.room.append("#........#\n")
+		self.room.append("#........#\n")
+		self.room.append("#........#\n")
+		self.room.append("#........#\n")
+		self.room.append("#........#\n")
+		self.room.append("#........#\n")
+		self.room.append("#........#\n")
+		self.room.append("##########\n")
+		self.col = len(self.room)
 	
 	def	__str__(self):
-		return self.map
+		map = ""
+		for line in self.room:
+			map += line
+		return map

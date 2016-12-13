@@ -19,7 +19,7 @@ class		GameManager():
 	def	__init__(self, name="Shayn's server", addr="localhost", port=4242, difficulty=2, lenght=10):
 
 		self.waitRoom = WaitRoom()
-		self.server = Server(addr, port, self.waitRoom.map)
+		self.server = Server(addr, port, self.waitRoom)
 		self.gameLevel = []
 		# for i in range(lenght):
 			# self.gameLevel.append(Level(i, difficulty))
@@ -37,7 +37,6 @@ class		GameManager():
 	def	_run(self):
 		while True:
 			self.server._waitEvent()
-
 
 game = GameManager()
 game._run()

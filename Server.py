@@ -16,7 +16,9 @@ from Network import Network
 class		Server():
 
 	def	__init__(self, ip, port, map):
-		Server.map = map
+		Server.map = map.__str__()
+		Server.rawmap = map.room
+		Server.row = map.row
 		self.turn = 0
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -67,6 +69,7 @@ class		Server():
 		for client in self.connected_clients:
 			if client.wait == True:
 				i += 1
+		# print len(self.connected_clients), i
 		if i == len(self.connected_clients):
 			print "All player have played!"
 			self.turn += 1
@@ -99,13 +102,31 @@ class		Server():
 			if s.id == id:
 				s.posX = int(position.split(":")[0])
 				s.posY = int(position.split(":")[1])
+				break
 
 	def _PlayerPositionChanged(self, id, position):
 		for s in self.connected_clients:
 			if s.id == id and s.wait == False:
 				s.wait = True
-				s.posX = int(position.split(":")[0])
-				s.posY = int(position.split(":")[1])
+				posX = int(position.split(":")[0])
+				posY = int(position.split(":")[1])
+				if self._collisionCheck(posX, posY) == True:
+					s.posX = int(position.split(":")[0])
+					s.posY = int(position.split(":")[1])
+					position = str(s.posX) + ":" + str(s.posY)
+					Network.SendPlayerPosition(s.socket, s.id, position)
+					self._playerHavePlayed(None, None)
+					break
+
+	def	_collisionCheck(self, posX, posY):
+		if Server.rawmap[posX][posY] == '.':
+			for s in self.connected_clients:
+				if s.posX == posX and s.posY == posY:
+					print "ANOTHER PLAYER ENCOUNTERED"
+					return False
+				else:
+					return True
+		return False
 
 	def	_sendMapClient(self, target):
 		Network.SendMapPlayer(target, Server.map)
