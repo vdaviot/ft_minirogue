@@ -26,6 +26,7 @@ class	Win():
 		stdscr = curses.initscr()
 		self.win = curses.newwin(col, row, 0, 0)
 		self.win.keypad(1)
+		# self.win.nodelay(1)
 		self.run = True
 		self.event = None
 
