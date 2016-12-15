@@ -49,7 +49,7 @@ class	Network():
 
 	@staticmethod
 	def setPlayerAddedCallback(callback):
-		Network.callbacks["AP"] = callback
+		Network.callbacks["NP"] = callback
 
 	@staticmethod
 	def	setPlayerIdCallback(callback):
@@ -62,6 +62,22 @@ class	Network():
 	@staticmethod
 	def	setPlayerIdCallback(callback):
 		Network.callbacks["ID"] = callback
+
+	@staticmethod
+	def	setPlayerAskForPosition(callback):
+		Network.callbacks["AP"] = callback
+
+	@staticmethod
+	def	AskServerIfPosition(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "AP", id, action)
+
+	@staticmethod
+	def sendPlayerAnswerPositon(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "AP", id, action)
+
+	@staticmethod
+	def	playerSendGoServer(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "LP", id, action)
 
 	@staticmethod # SP Player spawning position
 	def	sendPlayerSpawningPosition(targetSocket, id, action):
@@ -104,7 +120,7 @@ class	Network():
 
 	@staticmethod # AP Added player
 	def SendMultipleAddPlayer(targetSocket, players):
-		Network.sendWrapper(targetSocket, "AP", -1, players)
+		Network.sendWrapper(targetSocket, "NP", -1, players)
 
 	@staticmethod # ID Player id
 	def SendPlayerID(targetSocket, id):
@@ -134,7 +150,7 @@ class	Network():
 			strid = cmd[2:6]
 			id = struct.unpack("i", strid)[0]
 			cmd = cmd[6:]
-			if key == "AP":
+			if key == "NP":
 				for players in cmd.split(';'):
 					if players == "":
 						continue

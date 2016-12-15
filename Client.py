@@ -19,6 +19,7 @@ RIGHT = 261
 DOWN = 258
 LEFT = 260
 DEL = 127
+ENTER = 10
 
 class	Client():
 
@@ -36,6 +37,7 @@ class	Client():
 		self.addr = host + ':' + str(port)
 		self.turn = 0
 		self.wait = False
+		# self.canPlay = False
 		try:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.sock.connect((host, self.port))
@@ -46,7 +48,7 @@ class	Client():
 		except socket.error, e:
 			print "Could not connect to the game server at {} ({}).".format(self.port, e)
 			sys.exit(1)
-		self.inputs = [self.sock]
+		self.inputs = [self.sock, 0]
 		self.outputs = []
 
 		# CE QUE JE DOIT RECEVOIR DU SERVEUR
@@ -60,13 +62,12 @@ class	Client():
 
 	def	_playerGetNextTurn(self, id, datas):
 		self.turn = int(datas)
-		# self.win.win.addnstr(21, 40, "Next turn incomming! ({})".format(self.turn), len("Next turn incomming! ({})".format(self.turn)))
 		self.win.win.refresh()
 
 	def	_playerLetsPlay(self, id, datas):
+		# self.canPlay = True
 		self.turn = int(datas)
 		self.wait = False
-		# self.win.win.addnstr(22, 40, "It's your TURN! ({})".format(self.turn), len("It's your TURN! ({})".format(self.turn)))
 		self.win.win.refresh()
 
 	def _playerAskMap(self, id, datas):
@@ -75,8 +76,6 @@ class	Client():
 			self.map = datas
 		self.win.win.addnstr(0, 0, self.map, len(self.map))
 		self.win.win.addnstr(self.posX, self.posY, str(self.id), len(str(self.id)))
-		# for ppl in self.player:
-
 		self.win.win.refresh()
 
 	def _playerPositionChangeCallback(self, id, datas):
@@ -109,11 +108,13 @@ class	Client():
 			while True:
 				try:
 					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs, 0.1)
-					if len(readable) != 0:
-						if Network.Read(self.sock) == False:
+					for s in readable:
+						if s == 0:
+							if self._executeWinActions(self.win._nextTurn()) != False and self.wait == False:
+								self.win.win.clear()
+						elif Network.Read(s) == False:
 							print >>sys.stderr, "Server Disconnected, exiting.."
 							sys.exit(0)
-					self._executeWinActions(self.win._nextTurn())
 				except select.error, e:
 					print >>sys.stderr, e
 					time.sleep(1)
@@ -123,24 +124,24 @@ class	Client():
 			sys.exit(0)
 
 	def	_executeWinActions(self, action):
-		# self.win.win.addnstr(20, 40, str(self.wait), len(str(self.wait)))
-		if self.wait == True:
-			return False
-		else:
-			posY = self.posY
-			posX = self.posX
-			if action == LEFT:
-				posY -= 1
-			elif action == DOWN:
-				posX += 1
-			elif action == RIGHT:
-				posY += 1
-			elif action == UP:
-				posX -= 1
-			elif action == 127:
-				sys.exit(0)
 		self.wait = True
-		Network.SendPlayerPosition(self.sock, self.id, str(posX) + ":" + str(posY))
+		posY = self.posY
+		posX = self.posX
+		if action == LEFT:
+			posY -= 1
+		elif action == DOWN:
+			posX += 1
+		elif action == RIGHT:
+			posY += 1
+		elif action == UP:
+			posX -= 1
+		elif action == 127:
+			sys.exit(0)
+		elif action == ENTER and self.canPlay == False:
+			Network.playerSendGoServer(self.sock, self.id, "GO")
+		else:
+			return
+		Network.AskServerIfPosition(self.sock, self.id, str(posX) + ":" + str(posY))
 		self.win.win.refresh()
 
 client = Client(sys.argv[1], sys.argv[2], 4242)

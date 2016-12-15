@@ -47,6 +47,7 @@ class	Main_game():
 				self.player.move(self.event)
 				self.action = True
 
+			self.win.addnstr(0, 0, str(self.event), len(str(self.event)))
 			if self.event == 32:
 				self.player.actions(self.event, self.monster_table)
 				self.action = True
@@ -59,7 +60,7 @@ class	Main_game():
 			run = self.refresh(self.monster_table, self.player, self.run)
 			if run == False:
 				break
-			self.level.print_map(self.player, self.monster_table, Main_game.turn)
+			# self.level.print_map(self.player, self.monster_table, Main_game.turn)
 			self.event = win.getch()
 		self.win.clear()
 		self.win.addnstr(7, 20, "You died!", len("You died!"))

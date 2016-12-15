@@ -16,7 +16,7 @@ import socket, select, sys, types, struct, time
 
 class		GameManager():
 
-	def	__init__(self, name="Shayn's server", addr="10.11.9.2", port=4242, difficulty=2, lenght=10):
+	def	__init__(self, addr="10.11.13.7", port=4242, difficulty=2, lenght=10):
 
 		self.waitRoom = WaitRoom()
 		self.server = Server(addr, port, self.waitRoom)
@@ -38,5 +38,5 @@ class		GameManager():
 		while True:
 			self.server._waitEvent()
 
-game = GameManager()
+game = GameManager(sys.argv[1], int(sys.argv[2]))
 game._run()
