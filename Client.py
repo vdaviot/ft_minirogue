@@ -37,6 +37,7 @@ class	Client():
 		self.addr = host + ':' + str(port)
 		self.turn = 0
 		self.wait = False
+		self.peers = []
 		# self.canPlay = False
 		try:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -58,8 +59,18 @@ class	Client():
 		Network.setMapCallback(self._playerAskMap)
 		Network.setNextTurn(self._playerGetNextTurn)
 		Network.setPlayerLetsPlay(self._playerLetsPlay)
+		Network.setServerGiveClientPositions(self._getOtherPlayerPosition)
 		Network.setPlayerPositionChangeCallback(self._playerPositionChangeCallback)	
 
+	def	_getOtherPlayerPosition(self, id, datas):
+		for client in datas.split('\n'):
+			if client != "":
+				id, coord = client.split('=')[0], client.split("=")[1]
+				if id != self.id:
+					posX, posY = coord.split(':')[0], coord.split(':')[1]
+					self.peers.append(Peers(id, posX, posY))
+		self._playerAskMap(None, None)
+			
 	def	_playerGetNextTurn(self, id, datas):
 		self.turn = int(datas)
 		self.win.win.refresh()
@@ -75,6 +86,8 @@ class	Client():
 		if datas != None:
 			self.map = datas
 		self.win.win.addnstr(0, 0, self.map, len(self.map))
+		for player in self.peers:
+			self.win.win.addnstr(player.posX, player.posY, str(player.id), len(str(player.id)))
 		self.win.win.addnstr(self.posX, self.posY, str(self.id), len(str(self.id)))
 		self.win.win.refresh()
 
@@ -83,8 +96,6 @@ class	Client():
 			self.posX = int(datas.split(":")[0])
 			self.posY = int(datas.split(":")[1])
 			self.wait = True
-		else:
-			self.player[id]["pos"] = datas
 		self._playerAskMap(None, None)
 
 	def _playerAddedCallback(self, id, datas):
@@ -110,6 +121,7 @@ class	Client():
 					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs, 0.1)
 					for s in readable:
 						if s == 0:
+							self._playerAskMap(None, None)
 							if self._executeWinActions(self.win._nextTurn()) != False and self.wait == False:
 								self.win.win.clear()
 						elif Network.Read(s) == False:
@@ -127,22 +139,33 @@ class	Client():
 		self.wait = True
 		posY = self.posY
 		posX = self.posX
-		if action == LEFT:
-			posY -= 1
-		elif action == DOWN:
-			posX += 1
-		elif action == RIGHT:
-			posY += 1
-		elif action == UP:
-			posX -= 1
+		if action in [LEFT, RIGHT, DOWN, UP]:
+			if action == LEFT:
+				posY -= 1
+			elif action == DOWN:
+				posX += 1
+			elif action == RIGHT:
+				posY += 1
+			elif action == UP:
+				posX -= 1
+			Network.AskServerIfPosition(self.sock, self.id, str(posX) + ":" + str(posY))
+			self.win.win.refresh()
 		elif action == 127:
 			sys.exit(0)
-		elif action == ENTER and self.canPlay == False:
-			Network.playerSendGoServer(self.sock, self.id, "GO")
 		else:
-			return
-		Network.AskServerIfPosition(self.sock, self.id, str(posX) + ":" + str(posY))
-		self.win.win.refresh()
+			return False
+		# if action == ENTER and self.canPlay == False:
+			# Network.playerSendGoServer(self.sock, self.id, "GO")
+
+class Peers():
+
+	def __init__(self, id, posX, posY):
+		self.id = id
+		self.posX = int(posX)
+		self.posY = int(posY)
+
+	def	__str__(self):
+		return self.id
 
 client = Client(sys.argv[1], sys.argv[2], 4242)
 client._waitEvent()

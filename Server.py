@@ -66,6 +66,13 @@ class		Server():
 				self._removeConnectedClient(s)
 			self._playerHavePlayed(None, None)
 
+	def	_sendAllPlayerPositions(self):
+		toSend = ""
+		for client in self.connected_clients:
+			toSend += str(client.id) + "=" + str(client.posX) + ":" + str(client.posY) + "\n"
+		for client in self.connected_clients:
+			Network.sendClientPositionList(client.socket, client.id, toSend)
+
 	def	_launchGame(self, id, action):
 		for client in self.connected_clients:
 			Network.sendPlayerLetsPlay(client.socket, client.id, "GO")
@@ -125,6 +132,7 @@ class		Server():
 				else:
 					Network.SendPlayerPosition(s.socket, s.id, str(s.posX) + ":" + str(s.posY))
 					self._playerHavePlayed(None, None)
+			self._sendAllPlayerPositions()
 
 	def _PlayerPositionChanged(self, id, position):
 		for s in self.connected_clients:
@@ -145,7 +153,7 @@ class		Server():
 
 
 	def	_collisionCheck(self, posX, posY):
-		if Server.rawmap[posX][posY] not in "#01234":
+		if Server.rawmap[posX][posY] not in "#":
 			for s in self.connected_clients:
 				if s.posX == posX and s.posY == posY:
 					print "ANOTHER PLAYER ENCOUNTERED"

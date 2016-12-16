@@ -68,10 +68,18 @@ class	Network():
 		Network.callbacks["AP"] = callback
 
 	@staticmethod
+	def	setServerGiveClientPositions(callback):
+		Network.callbacks["EP"] = callback
+
+	@staticmethod # EP Entities positions
+	def	sendClientPositionList(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "EP", id, action)
+
+	@staticmethod # AP Ask for position (Client)
 	def	AskServerIfPosition(targetSocket, id, action):
 		Network.sendWrapper(targetSocket, "AP", id, action)
 
-	@staticmethod
+	@staticmethod  # AP Ask for position (Server)
 	def sendPlayerAnswerPositon(targetSocket, id, action):
 		Network.sendWrapper(targetSocket, "AP", id, action)
 
@@ -142,7 +150,7 @@ class	Network():
 		if not datas:
 			return False
 		cmds = datas.split('\x99')
-		print cmds
+		# print cmds
 		for cmd in cmds:
 			key = cmd[:2]
 			if not key:
