@@ -63,26 +63,34 @@ class	Client():
 		Network.setPlayerPositionChangeCallback(self._playerPositionChangeCallback)	
 
 	def	_getOtherPlayerPosition(self, id, datas):
+		self.win.win.clear()
 		for client in datas.split('\n'):
 			if client != "":
 				id, coord = client.split('=')[0], client.split("=")[1]
 				if id != self.id:
 					posX, posY = coord.split(':')[0], coord.split(':')[1]
-					self.peers.append(Peers(id, posX, posY))
-		self._playerAskMap(None, None)
+					b = 0
+					for ppl in self.peers:
+						if ppl.id == id:
+							ppl.posX, ppl.posY = int(posX), int(posY)
+						elif id != ppl.id:
+							b += 1
+					if b == len(self.peers):
+						self.peers.append(Peers(id, posX, posY))
+		# self._playerAskMap(None, None)
 			
 	def	_playerGetNextTurn(self, id, datas):
 		self.turn = int(datas)
-		self.win.win.refresh()
+		# self.win.win.refresh()
 
 	def	_playerLetsPlay(self, id, datas):
 		# self.canPlay = True
 		self.turn = int(datas)
 		self.wait = False
-		self.win.win.refresh()
+		# self.win.win.refresh()
 
 	def _playerAskMap(self, id, datas):
-		self.win.win.clear()
+		# self.win.win.clear()
 		if datas != None:
 			self.map = datas
 		self.win.win.addnstr(0, 0, self.map, len(self.map))
@@ -96,7 +104,7 @@ class	Client():
 			self.posX = int(datas.split(":")[0])
 			self.posY = int(datas.split(":")[1])
 			self.wait = True
-		self._playerAskMap(None, None)
+		# self._playerAskMap(None, None)
 
 	def _playerAddedCallback(self, id, datas):
 		msg = "player joined the game: " + str(id)
@@ -121,12 +129,12 @@ class	Client():
 					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs, 0.1)
 					for s in readable:
 						if s == 0:
-							self._playerAskMap(None, None)
 							if self._executeWinActions(self.win._nextTurn()) != False and self.wait == False:
 								self.win.win.clear()
 						elif Network.Read(s) == False:
 							print >>sys.stderr, "Server Disconnected, exiting.."
 							sys.exit(0)
+						self._playerAskMap(None, None)
 				except select.error, e:
 					print >>sys.stderr, e
 					time.sleep(1)
@@ -149,7 +157,7 @@ class	Client():
 			elif action == UP:
 				posX -= 1
 			Network.AskServerIfPosition(self.sock, self.id, str(posX) + ":" + str(posY))
-			self.win.win.refresh()
+			# self.win.win.refresh()
 		elif action == 127:
 			sys.exit(0)
 		else:
