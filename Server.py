@@ -30,7 +30,6 @@ class		Server():
 
 		# CE QUE JE DOIT RECEVOIR DES CLIENTS LES BATARDS
 		Network.setPlayerNameCallback(self._PlayerNameChanged)
-		# Network.setPlayerPositionChangeCallback(self._PlayerPositionChanged)
 		Network.setPlayerAskForPosition(self._playerAskingForPosition)
 		Network.setPlayerSpawningPositionCallback(self._playerSpawningPosition)
 		Network.setPlayerLetsPlay(self._launchGame)
@@ -117,6 +116,7 @@ class		Server():
 				break
 
 	def	_playerAskingForPosition(self, id, position):
+		print "ASKING"
 		for s in self.connected_clients:
 			if s.id == id and s.wait == False:
 				s.wait = True
@@ -127,33 +127,12 @@ class		Server():
 					s.posY = posY
 					position = str(s.posX) + ":" + str(s.posY)
 					Network.SendPlayerPosition(s.socket, s.id, position)
-					self._playerHavePlayed(None, None)
-					return
-				else:
-					Network.SendPlayerPosition(s.socket, s.id, str(s.posX) + ":" + str(s.posY))
-					self._playerHavePlayed(None, None)
-			self._sendAllPlayerPositions()
-
-	def _PlayerPositionChanged(self, id, position):
-		for s in self.connected_clients:
-			if s.id == id and s.wait == False:
-				s.wait = True
-				posX = int(position.split(":")[0])
-				posY = int(position.split(":")[1])
-				if self._collisionCheck(posX, posY) == True:
-					s.posX = posX
-					s.posY = posY
-					position = str(s.posX) + ":" + str(s.posY)
-					Network.SendPlayerPosition(s.socket, s.id, position)
-					self._playerHavePlayed(None, None)
-					return
-				else:
-					Network.SendPlayerPosition(s.socket, s.id, str(s.posX) + ":" + str(s.posY))
-					self._playerHavePlayed(None, None)
-
-
+					break
+		self._sendAllPlayerPositions()
+		self._playerHavePlayed(None, None)
+	
 	def	_collisionCheck(self, posX, posY):
-		if Server.rawmap[posX][posY] not in "#":
+		if Server.rawmap[posX][posY] != "#":
 			for s in self.connected_clients:
 				if s.posX == posX and s.posY == posY:
 					print "ANOTHER PLAYER ENCOUNTERED"
