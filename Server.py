@@ -20,6 +20,7 @@ class		Server():
 		Server.rawmap = map.room
 		Server.row = map.row
 		self.turn = 0
+		self.nextTurn = self.turn + 1
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.server.bind((ip, port))
@@ -63,7 +64,6 @@ class		Server():
 			for s in exceptional:
 				print >>sys.stderr, 'handling exceptional condition for', s.getpeername()
 				self._removeConnectedClient(s)
-			self._playerHavePlayed(None, None)
 
 	def	_sendAllPlayerPositions(self):
 		toSend = ""
@@ -87,8 +87,11 @@ class		Server():
 			for s in self.connected_clients:
 				s.wait = False
 				Network.sendNextTurnPlayer(s.socket, s.id, str(self.turn))
-				Network.sendPlayerLetsPlay(s.socket, s.id, str(self.turn))
 				self._sendMapClient(s.socket)
+		else:
+			print "Not anybody has played."
+		for client in self.connected_clients:
+			Network.sendPlayerLetsPlay(client.socket, client.id, str(self.turn))
 
 	def	_removeConnectedClient(self, target):
 		for p in self.connected_clients:

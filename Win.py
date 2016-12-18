@@ -24,9 +24,9 @@ class	Win():
 		self.row = row
 		self.col = col
 		stdscr = curses.initscr()
+		curses.curs_set(0)
 		self.win = curses.newwin(col, row, 0, 0)
 		self.win.keypad(1)
-		# self.win.nodelay(1)
 		self.run = True
 		self.event = None
 
@@ -34,6 +34,8 @@ class	Win():
 		return "Win:\n\t" + "row: {}\n\t".format(self.row) + "col: {}\n".format(self.col)
 		
 	def	_nextTurn(self):
-		return self.win.getch()
+		self.action = self.win.getch()
+		return self.action
 
-
+	def	_waitTurn(self):
+		return curses.ungetch(self.action)
