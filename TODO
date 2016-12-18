@@ -1,1 +1,14 @@
-A MODIF LES PUTAIN DE DEPLACEMENT QUI SE REPERCUTE PARTOUT SA MERE
+Server / Client:
+
+	- Corriger l'action en trop de chaque tour -> /!\ PRIORITY /!\
+	- Syncro les ID des joueurs quand quitter a l'arrache
+	- Gestion des Noms des joueurs pour affichage
+	- Amelioration des collisions entre joueurs
+	- Suppression du code inutile/optimisation du code reutilisable -> /!\ PRIORITY /!\
+
+Display:
+
+	- Interface composé dans une frame > Display du groupe (PRIO)/ map (PRIO) / equipement / inventaire / chat (LAST)
+	- Amelioration couleurs terminal
+	- 
+

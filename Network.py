@@ -71,6 +71,10 @@ class	Network():
 	def	setServerGiveClientPositions(callback):
 		Network.callbacks["EP"] = callback
 
+	@staticmethod
+	def	setOtherPlayerName(callback):
+		Network.callbacks["NA"] = callback
+
 	@staticmethod # EP Entities positions
 	def	sendClientPositionList(targetSocket, id, action):
 		Network.sendWrapper(targetSocket, "EP", id, action)
@@ -117,10 +121,7 @@ class	Network():
 
 	@staticmethod # PL Player leaved
 	def SendPlayerLeaved(targetSocket, id):
-		try:
-			Network.sendWrapper(targetSocket, "PL", id, "")
-		except socket.error as e:
-			print >>sys.stderr, e
+		Network.sendWrapper(targetSocket, "PL", id, "")
 
 	@staticmethod
 	def SendAddPlayer(targetSocket, id, name):

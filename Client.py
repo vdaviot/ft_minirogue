@@ -27,7 +27,7 @@ class	Client():
 	posX = 1
 	posY = 1
 
-	def	__init__(self, name, host, port=4242):
+	def	__init__(self, name, host, port = 4242):
 		self.name = name
 		self.win = Win(400, 400)
 		self.posY = random.randrange(1, 8)
@@ -39,7 +39,6 @@ class	Client():
 		self.wait = False
 		self.map = ""
 		self.peers = []
-		# self.canPlay = False
 		try:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.sock.connect((host, self.port))
@@ -55,45 +54,44 @@ class	Client():
 
 		# CE QUE JE DOIT RECEVOIR DU SERVEUR
 		Network.setPlayerAddedCallback(self._playerAddedCallback)
+		Network.setPlayerIdCallback(self._playerHaveNewId)
 		Network.setPlayerLeavedCallback(self._playerLeavedCallback)
 		Network.setPlayerNameCallback(self._playerChangeNameCallback)
 		Network.setMapCallback(self._playerAskMap)
 		Network.setNextTurn(self._playerGetNextTurn)
 		Network.setPlayerLetsPlay(self._playerLetsPlay)
 		Network.setServerGiveClientPositions(self._getOtherPlayerPosition)
-		Network.setPlayerPositionChangeCallback(self._playerPositionChangeCallback)	
-		# Network.setPlayerPositionChangeCallback(self._getMyPlayerPosition)	
+		Network.setPlayerPositionChangeCallback(self._playerPositionChangeCallback)
+		Network.setOtherPlayerName(self._getOtherPlayerName)
 
-	def	_getMyPlayerPosition(self, id, datas):
-		dt = str(id) + "=" + str(datas) + "\n"
-		self._getOtherPlayerPosition(None, dt)
+	def	_getOtherPlayerName(self, id, datas):
+		for s in self.peers:
+			if s.id == id:
+				s.name = datas
+
+	def	_playerHaveNewId(self, id, datas):
+		self.id = id
+		self.win.win.addstr(0, 0, datas)
+		self.win.win.refresh()
 
 	def	_getOtherPlayerPosition(self, id, datas):
-		# self.win.win.clear()
 		for client in datas.split('\n'):
 			if client != "":
 				id, coord = client.split('=')[0], client.split("=")[1]
 				posX, posY = int(coord.split(':')[0]), int(coord.split(':')[1])
 				b = 0
 				for ppl in self.peers:
-					if id == self.id and id == ppl.id:
-						self.posX, self.posY = posX, posY
-						ppl.posX, ppl.posY = posX, posY
-					elif ppl.id == id:
+					if ppl.id == id:
 						ppl.posX, ppl.posY = posX, posY
 					else:
 						b += 1
 				if b == len(self.peers):
 					self.peers.append(Peers(id, posX, posY))
-		self._playerAskMap(None, None)
 			
 	def	_playerGetNextTurn(self, id, datas):
 		self.turn = int(datas)
-		# self._playerAskMap(None, None)
 
 	def	_playerLetsPlay(self, id, datas):
-		# self.canPlay = True
-		# self.turn = int(datas)
 		self.wait = False
 		self._playerAskMap(None, None)
 
@@ -105,7 +103,7 @@ class	Client():
 			self.win.win.addnstr(0, 0, self.map, len(self.map))
 		i = 0
 		for player in self.peers:
-			if player.posX == self.posX and player.posY == self.posY:
+			if player.posX == self.posX and player.posY == self.posY or player.id == -1:
 				continue
 			else:
 				self.win.win.addnstr(player.posX, player.posY, str(player.id), len(str(player.id)))
@@ -122,6 +120,8 @@ class	Client():
 
 	def _playerAddedCallback(self, id, datas):
 		msg = "player joined the game: " + str(id)
+		self.peers.append(Peers(id, 0, 0))
+		# self._getOtherPlayerName(id, datas)
 		self.win.win.addnstr(20, 40, msg, len(msg))
 		self.players[id] = {"name":""}
 		self.players[id]["name"] = str(id)
@@ -135,10 +135,17 @@ class	Client():
 		p = self.peers.pop(i)
 		del p
 		msg = "Player {} disconnected.".format(id)
+		for people in self.peers:
+			if people.id > id and people.id > 0:
+				people.id = int(people.id) - 1
+				print people.id
 		self.win.win.addnstr(22, 40, msg, len(msg))
 		self.win.win.refresh()
 
 	def _playerChangeNameCallback(self, id, datas):
+		for s in self.peers:
+			if id == s.id:
+				s.name = datas
 		self.players[id]["name"] = datas
 
 	def	_waitEvent(self):
@@ -159,7 +166,6 @@ class	Client():
 						elif Network.Read(s) == False:
 							print >>sys.stderr, "Server Disconnected, exiting.."
 							sys.exit(0)
-					self._playerAskMap(None, None)
 				except select.error, e:
 					print >>sys.stderr, e
 					time.sleep(1)
@@ -194,11 +200,16 @@ class Peers():
 
 	def __init__(self, id, posX, posY):
 		self.id = id
+		self.name = None
 		self.posX = int(posX)
 		self.posY = int(posY)
 
 	def	__str__(self):
-		return "Peers n{} is at x:{} y:{}.".format(self.id, self.posX, self.posY)
+		if self.name != None:
+			return "{} is at x:{} y:{}.".format(self.name, self.posX, self.posY)
+		else:
+			return "Peers n{} is at x:{} y:{}.".format(self.id, self.posX, self.posY)
+
 
 client = Client(sys.argv[1], sys.argv[2], 4242)
 client._waitEvent()

@@ -96,8 +96,14 @@ class		Server():
 	def	_removeConnectedClient(self, target):
 		for p in self.connected_clients:
 			if p.socket.fileno() == target.fileno():
+				# ConnectedClient._clientLeaved(ConnectedClient(None))
+				leaverId = p.id
 				self.connected_clients.remove(p)
 				self._sendClientLeaved(p.socket, p.id)
+		# for p in self.connected_clients:
+		# 	if p.id > leaverId:
+		# 		p.id = int(p.id) - 1
+		# 	Network.SendPlayerID(p.socket, p.id)
 		if target in self.inputs:
 			self.inputs.remove(target)
 		if target in self.outputs:
@@ -164,6 +170,7 @@ class		Server():
 		for s in self.connected_clients:
 			if s.socket.fileno() != connection.fileno():
 				Network.SendPlayerLeaved(s.socket, id)
+		
 
 	def _sendClientNameChanged(self, connection, id, newName):
 		for s in self.connected_clients:
@@ -175,6 +182,9 @@ class	ConnectedClient():
 	clientID = 0
 
 	def	__init__(self, sock):
+		# if sock == None:
+		# 	self._clientLeaved()
+		# 	return
 		self.id = ConnectedClient.clientID
 		ConnectedClient.clientID += 1
 		self.wait = False
@@ -187,6 +197,8 @@ class	ConnectedClient():
 		msg = str(self.id) + " should wait?: {}".format(self.wait)
 		return msg
 
+	# def	_clientLeaved(self):
+		# if ConnectedClient.clientID > 0: ConnectedClient.clientID -= 1 
 
 	def	_setClientName(self, name):
 		self.name = name

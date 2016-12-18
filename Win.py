@@ -34,8 +34,8 @@ class	Win():
 		return "Win:\n\t" + "row: {}\n\t".format(self.row) + "col: {}\n".format(self.col)
 		
 	def	_nextTurn(self):
-		self.action = self.win.getch()
-		return self.action
+		return self.win.getch()
 
 	def	_waitTurn(self):
-		return curses.ungetch(self.action)
+		action = self.win.getch()
+		return self.win.ungetch()
