@@ -70,8 +70,8 @@ class	Client():
 				s.name = datas
 
 	def	_playerHaveNewId(self, id, datas):
-		self.id = id
-		self.win.win.addstr(0, 0, datas)
+		self.id = datas
+		# self.win.win.addstr(0, 0, datas)
 		self.win.win.refresh()
 
 	def	_getOtherPlayerPosition(self, id, datas):
@@ -120,7 +120,7 @@ class	Client():
 
 	def _playerAddedCallback(self, id, datas):
 		msg = "player joined the game: " + str(id)
-		self.peers.append(Peers(id, 0, 0))
+		# self.peers.append(Peers(id, 0, 0))
 		# self._getOtherPlayerName(id, datas)
 		self.win.win.addnstr(20, 40, msg, len(msg))
 		self.players[id] = {"name":""}
@@ -138,7 +138,7 @@ class	Client():
 		for people in self.peers:
 			if people.id > id and people.id > 0:
 				people.id = int(people.id) - 1
-				print people.id
+				# print people.id
 		self.win.win.addnstr(22, 40, msg, len(msg))
 		self.win.win.refresh()
 

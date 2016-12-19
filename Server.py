@@ -115,7 +115,7 @@ class		Server():
 		for s in self.connected_clients:
 			if s.id == id:
 				s.name = name
-				self._sendClientNameChanged(s.socket, s.id, name)
+				# self._sendClientNameChanged(s.socket, s.id, name)
 
 	def	_playerSpawningPosition(self, id, position):
 		for s in self.connected_clients:
