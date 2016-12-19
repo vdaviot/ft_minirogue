@@ -19,33 +19,8 @@ class	Network():
 	def __init__(self):
 		Network.callbacks = {}
 
-	@staticmethod
-	def setPlayerPositionChangeCallback(callback):
-		Network.callbacks["PP"] = callback
 
-	@staticmethod
-	def	setPlayerLetsPlay(callback):
-		Network.callbacks["LP"] = callback
-
-	@staticmethod
-	def	setPlayerSpawningPositionCallback(callback):
-		Network.callbacks["SP"] = callback
-
-	@staticmethod
-	def	setNextTurn(callback):
-		Network.callbacks["NT"] = callback
-
-	@staticmethod
-	def setPlayerNameCallback(callback):
-		Network.callbacks["NA"] = callback
-
-	@staticmethod
-	def	setPlayerChoosedAction(callback):
-		Network.callbacks["CA"] = callback
-
-	@staticmethod
-	def setPlayerLeavedCallback(callback):
-		Network.callbacks["PL"] = callback
+	# Client to Server Callbacks
 
 	@staticmethod
 	def setPlayerAddedCallback(callback):
@@ -60,12 +35,12 @@ class	Network():
 		Network.callbacks["MA"] = callback
 
 	@staticmethod
-	def	setPlayerIdCallback(callback):
-		Network.callbacks["ID"] = callback
+	def	setNextTurn(callback):
+		Network.callbacks["NT"] = callback
 
 	@staticmethod
-	def	setPlayerAskForPosition(callback):
-		Network.callbacks["AP"] = callback
+	def setPlayerLeavedCallback(callback):
+		Network.callbacks["PL"] = callback
 
 	@staticmethod
 	def	setServerGiveClientPositions(callback):
@@ -75,41 +50,21 @@ class	Network():
 	def	setOtherPlayerName(callback):
 		Network.callbacks["NA"] = callback
 
-	@staticmethod # EP Entities positions
-	def	sendClientPositionList(targetSocket, id, action):
-		Network.sendWrapper(targetSocket, "EP", id, action)
+	@staticmethod
+	def setPlayerPositionChangeCallback(callback):
+		Network.callbacks["PP"] = callback
 
 	@staticmethod # AP Ask for position (Client)
 	def	AskServerIfPosition(targetSocket, id, action):
 		Network.sendWrapper(targetSocket, "AP", id, action)
 
-	@staticmethod  # AP Ask for position (Server)
-	def sendPlayerAnswerPositon(targetSocket, id, action):
-		Network.sendWrapper(targetSocket, "AP", id, action)
-
-	@staticmethod
+	@staticmethod # LP Let's Play
 	def	playerSendGoServer(targetSocket, id, action):
 		Network.sendWrapper(targetSocket, "LP", id, action)
 
 	@staticmethod # SP Player spawning position
 	def	sendPlayerSpawningPosition(targetSocket, id, action):
 		Network.sendWrapper(targetSocket, "SP", id, action)
-
-	@staticmethod # LP Player can play
-	def	sendPlayerLetsPlay(targetSocket, id, action):
-		Network.sendWrapper(targetSocket, "LP", id, action)
-
-	@staticmethod # CA Player has choosed an action
-	def	sendPlayerChoosedAction(targetSocket, id, action): 
-		Network.sendWrapper(targetSocket, "CA", id, action)
-
-	@staticmethod # NT Player Next Turn
-	def	sendNextTurnPlayer(targetSocket, id, message):
-		Network.sendWrapper(targetSocket, "NT", id, message)
-
-	@staticmethod # Wrapper to send nicely formatted messages
-	def sendWrapper(socket, cmd, id, message):
-		socket.send(cmd + struct.pack("i", id) + message + "\x99")
 
 	@staticmethod # PP Player position
 	def SendPlayerPosition(targetSocket, id, position):
@@ -119,11 +74,52 @@ class	Network():
 	def SendPlayerName(targetSocket, id, name):
 		Network.sendWrapper(targetSocket, "NA", id, name)
 
+
+	
+	# Server to Client Callbacks
+
+	@staticmethod
+	def	setPlayerAskForPosition(callback):
+		Network.callbacks["AP"] = callback
+
+	@staticmethod
+	def	setPlayerSpawningPositionCallback(callback):
+		Network.callbacks["SP"] = callback
+
+	# @staticmethod
+	# def	setPlayerNewIdCallback(callback):
+	# 	Network.callbacks["PL"] = callback
+		
+	@staticmethod
+	def	setPlayerLetsPlay(callback):
+		Network.callbacks["LP"] = callback
+
+	@staticmethod
+	def setPlayerNameCallback(callback):
+		Network.callbacks["NA"] = callback
+
+	@staticmethod # NT Player Next Turn
+	def	sendNextTurnPlayer(targetSocket, id, message):
+		Network.sendWrapper(targetSocket, "NT", id, message)
+		
+	@staticmethod # EP Entities positions
+	def	sendClientPositionList(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "EP", id, action)
+
+	@staticmethod  # AP Ask for position (Server)
+	def sendPlayerAnswerPositon(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "AP", id, action)
+
+	@staticmethod # LP Player can play
+	def	sendPlayerLetsPlay(targetSocket, id, action):
+		Network.sendWrapper(targetSocket, "LP", id, action)
+
+
 	@staticmethod # PL Player leaved
 	def SendPlayerLeaved(targetSocket, id):
 		Network.sendWrapper(targetSocket, "PL", id, "")
 
-	@staticmethod
+	@staticmethod # Multiple AP
 	def SendAddPlayer(targetSocket, id, name):
 		Network.SendMultipleAddPlayer(targetSocket, name + "," + struct.pack("i", id) + ";")
 
@@ -145,7 +141,27 @@ class	Network():
 	def	SendMapPlayer(targetSocket, map):
 		Network.sendWrapper(targetSocket, "MA", -1, map)
 
-	@staticmethod
+
+
+	# Unused at the moment
+
+	# @staticmethod
+	# def	setPlayerChoosedAction(callback):
+	# 	Network.callbacks["CA"] = callback
+
+	# @staticmethod # CA Player has choosed an action
+	# def	sendPlayerChoosedAction(targetSocket, id, action): 
+	# 	Network.sendWrapper(targetSocket, "CA", id, action)
+
+
+
+	# Utility Method
+
+	@staticmethod # Wrapper to send nicely formatted messages
+	def sendWrapper(socket, cmd, id, message):
+		socket.send(cmd + struct.pack("i", id) + message + "\x99")
+
+	@staticmethod # Reading method for client and server to talk
 	def Read(targetSocket):
 		datas = targetSocket.recv(4096)
 		if not datas:

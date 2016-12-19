@@ -28,12 +28,14 @@ class		Server():
 		self.inputs = [self.server]
 		self.outputs = []
 		self.connected_clients = []
+		self.disconnected_clients = []
 
-		# CE QUE JE DOIT RECEVOIR DES CLIENTS LES BATARDS
+		# CE QUE JE DOIT RECEVOIR DES CLIENTS
 		Network.setPlayerNameCallback(self._PlayerNameChanged)
 		Network.setPlayerAskForPosition(self._playerAskingForPosition)
 		Network.setPlayerSpawningPositionCallback(self._playerSpawningPosition)
 		Network.setPlayerLetsPlay(self._launchGame)
+		# Network.setPlayerNewIdCallback(self._givePlayerNewID)
 
 	def	_waitEvent(self):
 		while self.inputs:
@@ -64,6 +66,27 @@ class		Server():
 			for s in exceptional:
 				print >>sys.stderr, 'handling exceptional condition for', s.getpeername()
 				self._removeConnectedClient(s)
+	
+
+
+
+	# Unused at the moment
+
+	def	_launchGame(self, id, action):
+		for client in self.connected_clients:
+			Network.sendPlayerLetsPlay(client.socket, client.id, "GO")
+
+
+
+
+
+
+
+
+
+
+	# def	_givePlayerNewID(self, id, action):
+	# 	for client in self.co
 
 	def	_sendAllPlayerPositions(self):
 		toSend = ""
@@ -72,9 +95,6 @@ class		Server():
 		for client in self.connected_clients:
 			Network.sendClientPositionList(client.socket, client.id, toSend)
 
-	def	_launchGame(self, id, action):
-		for client in self.connected_clients:
-			Network.sendPlayerLetsPlay(client.socket, client.id, "GO")
 
 	def	_playerHavePlayed(self, id, action):
 		i = 0
@@ -88,22 +108,15 @@ class		Server():
 				s.wait = False
 				Network.sendNextTurnPlayer(s.socket, s.id, str(self.turn))
 				self._sendMapClient(s.socket)
-		else:
-			print "Not anybody has played."
 		for client in self.connected_clients:
 			Network.sendPlayerLetsPlay(client.socket, client.id, str(self.turn))
 
 	def	_removeConnectedClient(self, target):
 		for p in self.connected_clients:
 			if p.socket.fileno() == target.fileno():
-				# ConnectedClient._clientLeaved(ConnectedClient(None))
-				leaverId = p.id
+				self.disconnected_clients.append(p)
 				self.connected_clients.remove(p)
 				self._sendClientLeaved(p.socket, p.id)
-		# for p in self.connected_clients:
-		# 	if p.id > leaverId:
-		# 		p.id = int(p.id) - 1
-		# 	Network.SendPlayerID(p.socket, p.id)
 		if target in self.inputs:
 			self.inputs.remove(target)
 		if target in self.outputs:
@@ -111,11 +124,20 @@ class		Server():
 		target.close()
 
 	def _PlayerNameChanged(self, id, name):
-		print "Player {} is now called {}! ".format(id, name)
+		for s in self.connected_clients:
+			if s.id == id:
+				socket = s.socket
+		for ppl in self.disconnected_clients:
+			if ppl.id == id:
+				self.connected_clients.append(ConnectedClient(s.socket, ppl.id, ppl.name, ppl.posX, ppl.posY))
+				print "Welcome back {}! ({})".format(ppl.name, ppl.id)
+				self.disconnected_clients.remove(ppl)
+				return
 		for s in self.connected_clients:
 			if s.id == id:
 				s.name = name
-				# self._sendClientNameChanged(s.socket, s.id, name)
+				print "Player {} is now called {}! ".format(id, name)
+				self._sendClientNameChanged(s.socket, s.id, name)
 
 	def	_playerSpawningPosition(self, id, position):
 		for s in self.connected_clients:
@@ -125,7 +147,6 @@ class		Server():
 				break
 
 	def	_playerAskingForPosition(self, id, position):
-		print "ASKING"
 		for s in self.connected_clients:
 			if s.id == id and s.wait == False:
 				s.wait = True
@@ -171,34 +192,36 @@ class		Server():
 			if s.socket.fileno() != connection.fileno():
 				Network.SendPlayerLeaved(s.socket, id)
 		
-
 	def _sendClientNameChanged(self, connection, id, newName):
 		for s in self.connected_clients:
 			if s.socket.fileno() != connection.fileno():
 				Network.SendPlayerName(s.socket, id, newName)
 
+class	DisconnectedClient():
+
+	def	__init__(self, sock, name, id, posX, posY):
+		self.socket, self.name, self.id, self.posX, self.posY = sock, name, id, posX, posY
+
+
 class	ConnectedClient():
 
 	clientID = 0
 
-	def	__init__(self, sock):
-		# if sock == None:
-		# 	self._clientLeaved()
-		# 	return
-		self.id = ConnectedClient.clientID
-		ConnectedClient.clientID += 1
+	def	__init__(self, sock, id=None, name=None, posX=1, posY=1):
+		if id != None:
+			self.id = id
+		else:
+			self.id = ConnectedClient.clientID
+			ConnectedClient.clientID += 1
 		self.wait = False
-		self.name = None
-		self.posX = 1
-		self.posY = 1
+		self.name = name
+		self.posX = posX
+		self.posY = posY
 		self.socket = sock
 
 	def __str__(self):
 		msg = str(self.id) + " should wait?: {}".format(self.wait)
 		return msg
-
-	# def	_clientLeaved(self):
-		# if ConnectedClient.clientID > 0: ConnectedClient.clientID -= 1 
 
 	def	_setClientName(self, name):
 		self.name = name
