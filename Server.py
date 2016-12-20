@@ -16,9 +16,9 @@ from Network import Network
 class		Server():
 
 	def	__init__(self, ip, port, map):
+		Server.rawmap = map.generate_definitive_map()
 		Server.map = map.__str__()
-		Server.rawmap = map.room
-		Server.row = map.row
+		Server.row = map.col
 		self.turn = 0
 		self.nextTurn = self.turn + 1
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -162,7 +162,7 @@ class		Server():
 		self._playerHavePlayed(None, None)
 	
 	def	_collisionCheck(self, posX, posY):
-		if Server.rawmap[posX][posY] != "#":
+		if Server.rawmap[posX][posY] == 2:
 			for s in self.connected_clients:
 				if s.posX == posX and s.posY == posY:
 					print "ANOTHER PLAYER ENCOUNTERED"

@@ -29,7 +29,6 @@ class Cellar_automata():
 		self.up_loc = 0
 		self.center = (int(self.row / 2) , int(self.col / 2))
 		self.generate_initial_map(density)
-		self.map = self.__str__()
 
 	def	__str__(self):
 		x = 0
@@ -158,9 +157,9 @@ class Cellar_automata():
 # for i in range(9):
 	# print
 	# print("map {}:").format(i + 1)
-ca = Cellar_automata(random.randrange(10, 40), random.randrange(10, 40), random.uniform(0.40, 0.50))
-ca.generate_definitive_map()
-print ca
+# ca = Cellar_automata(random.randrange(10, 40), random.randrange(10, 40), random.uniform(0.40, 0.50))
+# ca.generate_definitive_map()
+# print ca
 
 
 

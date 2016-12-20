@@ -10,15 +10,17 @@
 #                                                                              #
 # **************************************************************************** #
 
+from Cellar_automata import Cellar_automata
 from Server import Server
 from WaitRoom import WaitRoom
-import socket, select, sys, types, struct, time
+import socket, select, sys, types, struct, time, random
 
 class		GameManager():
 
 	def	__init__(self, addr="localhost", port=4242, difficulty=2, lenght=10):
 
 		self.waitRoom = WaitRoom()
+		self.waitRoom = Cellar_automata(random.randrange(10, 30), random.randrange(10, 30))
 		self.server = Server(addr, port, self.waitRoom)
 		self.gameLevel = []
 		# for i in range(lenght):

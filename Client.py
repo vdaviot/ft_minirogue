@@ -192,7 +192,7 @@ class	Client():
 			Network.AskServerIfPosition(self.sock, self.id, str(posX) + ":" + str(posY))
 			return True
 		elif action == 127:
-			sys.exit(0)
+			self.win._leave()	
 		else:
 			return False
 		# if action == ENTER and self.canPlay == False:

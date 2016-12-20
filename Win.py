@@ -25,6 +25,7 @@ class	Win():
 		self.col = col
 		stdscr = curses.initscr()
 		curses.curs_set(0)
+		curses.cbreak()
 		self.win = curses.newwin(col, row, 0, 0)
 		self.win.keypad(1)
 		self.run = True
@@ -32,6 +33,9 @@ class	Win():
 
 	def	__str__(self):
 		return "Win:\n\t" + "row: {}\n\t".format(self.row) + "col: {}\n".format(self.col)
+		
+	def	_leave(self):
+		curses.endwin()
 		
 	def	_nextTurn(self):
 		return self.win.getch()
