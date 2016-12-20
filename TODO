@@ -1,14 +1,37 @@
+
+
+HIGHEST/HIGH/MID/LOW/LOWEST
+
 Server / Client:
 
-	- Corriger l'action en trop de chaque tour -> /!\ PRIORITY /!\
-	- Syncro les ID des joueurs quand quitter a l'arrache
-	- Gestion des Noms des joueurs pour affichage
-	- Amelioration des collisions entre joueurs
-	- Suppression du code inutile/optimisation du code reutilisable -> /!\ PRIORITY /!\
+	- Corriger l'action en trop de chaque tour (HIGHEST)
+	- Syncro les ID des joueurs quand quitter a l'arrache (HIGHEST)
+	- Suppression du code inutile/optimisation du code reutilisable (HIGHEST)
+	- Gestion des Noms des joueurs pour affichage (MID)
+	- Amelioration des collisions entre joueurs (MID)
+	- Chat (LOWEST)
 
 Display:
 
-	- Interface composé dans une frame > Display du groupe (PRIO)/ map (PRIO) / equipement / inventaire / chat (LAST)
-	- Amelioration couleurs terminal
-	- 
+	- Interface composé dans une frame > Display du groupe (HIGH)/ map (HIGH) / equipement (MID) / inventaire (MID)
+	- Amelioration display terminal (Couleurs/Sprites) (LOWEST)
 
+Map:
+
+	- Meilleur algo de map (Cellar/Maze/OutsidePlace/Forest) (MID)
+	- Algo pour relier les rooms (LOW)
+	- Algo pour faire les portes (LOW)
+
+Monstres:
+
+	- A* Pathfinding multi iteration (Idiot/Smart/Idle/LookingForTarget) (MID)
+	- Ameliorer generation de monstres (ID/Stuff/Com Server) (LOW)
+	- Equilibrage (LOW)
+
+Items:
+
+	- Finir generation de Currency (MID)
+	- Ameliorer generation de stuff (LOW)
+	- Generation de Potions/Scroll/Plantes (LOW)
+	- Generation de coffre (LOW)
+	- Equilibrage (LOWEST)
