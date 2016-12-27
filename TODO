@@ -8,13 +8,12 @@ Server / Client:
 	- Syncro les ID des joueurs quand quitter a l'arrache (HIGHEST)
 	- Suppression du code inutile/optimisation du code reutilisable (HIGHEST)
 	- Gestion des Noms des joueurs pour affichage (MID)
-	- Amelioration des collisions entre joueurs (MID)
-	- Chat (LOWEST)
 
 Display:
 
 	- Interface composé dans une frame > Display du groupe (HIGH)/ map (HIGH) / equipement (MID) / inventaire (MID)
 	- Amelioration display terminal (Couleurs/Sprites) (LOWEST)
+	- Chat (LOWEST)
 
 Map:
 

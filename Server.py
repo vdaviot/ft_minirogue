@@ -162,13 +162,17 @@ class		Server():
 		self._playerHavePlayed(None, None)
 	
 	def	_collisionCheck(self, posX, posY):
+		collision = False
 		if Server.rawmap[posX][posY] == 2:
 			for s in self.connected_clients:
 				if s.posX == posX and s.posY == posY:
 					print "ANOTHER PLAYER ENCOUNTERED"
-					return False
-				else:
-					return True
+					collision = True
+					# return False
+				# else:
+					# return True
+		if collision == False:
+			return True
 		return False
 
 	def	_sendMapClient(self, target):
