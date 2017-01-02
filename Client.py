@@ -30,11 +30,10 @@ class	Client():
 	def	__init__(self, name, host, port = 4242):
 		self.name = name
 		self.win = Win(400, 400)
-		self.posY = random.randrange(1, 8)
-		self.posX = random.randrange(1, 8)
+		self.posY = 1
+		self.posX = 1
 		self.host = host
 		self.port = int(port)
-		self.addr = host + ':' + str(port)
 		self.turn = 0
 		self.wait = False
 		self.map = ""
@@ -94,9 +93,14 @@ class	Client():
 		self.wait = False
 		self._playerAskMap(None, None)
 
+	def	_getMapData(self, datas):
+		self.map = datas
+		self.mapRow = self.map.count("\n")
+		self.mapCol = int(len(self.map)  / self.mapRow) - 1
+
 	def _playerAskMap(self, id, datas):
 		if datas != None:
-			self.map = datas
+			self._getMapData(datas)
 			self.win.win.addnstr(0, 0, self.map, len(self.map))
 		else:
 			self.win.win.addnstr(0, 0, self.map, len(self.map))
@@ -114,7 +118,6 @@ class	Client():
 		if id == self.id:
 			self.posX = int(datas.split(":")[0])
 			self.posY = int(datas.split(":")[1])
-			self.wait = True
 		self._playerAskMap(None, None)
 
 	def _playerAddedCallback(self, id, datas):
@@ -157,12 +160,14 @@ class	Client():
 					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs)
 					for s in readable:
 						if s == 0:
+							print "FDP"
 							if self.wait == False:
 								action = self.win._nextTurn()
+								self.win.win.addnstr(30, 40, str(action), len(str(action)))
 								if self._executeWinActions(action) != False:
 									self.win.win.clear()
-							else:
-								self.win._nextTurn()
+							# else:
+							# 	self.win._nextTurn()
 								# pass
 								continue
 						elif Network.Read(s) == False:
@@ -181,14 +186,17 @@ class	Client():
 			self.wait = True
 			posY = self.posY
 			posX = self.posX
-			if action == LEFT:
+			if action == LEFT and posY - 1 >= 0:
 				posY -= 1
-			elif action == DOWN:
+			elif action == DOWN and posX + 1 < self.mapRow:
 				posX += 1
-			elif action == RIGHT:
+			elif action == RIGHT and posY + 1 < self.mapCol:
 				posY += 1
-			elif action == UP:
+			elif action == UP and posX - 1 >= 0:
 				posX -= 1
+			else:
+				self.wait = False
+				return False
 			Network.AskServerIfPosition(self.sock, self.id, str(posX) + ":" + str(posY))
 			return True
 		elif action == 127:

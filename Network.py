@@ -19,7 +19,22 @@ class	Network():
 	def __init__(self):
 		Network.callbacks = {}
 
-
+# def _generatePlayerPositions(self, id, datas):
+# 		for s in self.connected_clients:
+# 			if s.id == id:
+# 				posX = int(datas.split(":")[0])
+# 				posY = int(datas.split(":")[1])
+# 				print posX, posY
+# 				while self._collisionCheck(posX, posY) == True:
+# 					if posX > posY:
+# 						posX += 1
+# 					else:
+# 						posY += 1
+# 				s.posX = posX
+# 				s.posY = posY
+# 				position = str(s.posX) + ":" + str(s.posY)
+# 				Network.SendPlayerPosition(s.socket, s.id, position)
+# 				break
 	# Client to Server Callbacks
 
 	@staticmethod

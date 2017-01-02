@@ -19,6 +19,7 @@ class		GameManager():
 
 	def	__init__(self, addr="localhost", port=4242, difficulty=2, lenght=10):
 
+		# print addr, port
 		self.waitRoom = WaitRoom()
 		self.waitRoom = Cellar_automata(random.randrange(10, 30), random.randrange(10, 30))
 		self.server = Server(addr, port, self.waitRoom)
