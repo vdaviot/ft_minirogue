@@ -19,22 +19,6 @@ class	Network():
 	def __init__(self):
 		Network.callbacks = {}
 
-# def _generatePlayerPositions(self, id, datas):
-# 		for s in self.connected_clients:
-# 			if s.id == id:
-# 				posX = int(datas.split(":")[0])
-# 				posY = int(datas.split(":")[1])
-# 				print posX, posY
-# 				while self._collisionCheck(posX, posY) == True:
-# 					if posX > posY:
-# 						posX += 1
-# 					else:
-# 						posY += 1
-# 				s.posX = posX
-# 				s.posY = posY
-# 				position = str(s.posX) + ":" + str(s.posY)
-# 				Network.SendPlayerPosition(s.socket, s.id, position)
-# 				break
 	# Client to Server Callbacks
 
 	@staticmethod
@@ -146,6 +130,11 @@ class	Network():
 	def SendPlayerID(targetSocket, id):
 		Network.sendWrapper(targetSocket, "ID", id, "")
 
+	@staticmethod # ID Player id
+	def SendPlayerNewId(targetSocket, id, newId):
+		Network.sendWrapper(targetSocket, "ID", id, str(newId))
+
+
 	@staticmethod
 	def GetPlayerID(targetSocket):
 		targetSocket.recv(2)
@@ -156,18 +145,7 @@ class	Network():
 	def	SendMapPlayer(targetSocket, map):
 		Network.sendWrapper(targetSocket, "MA", -1, map)
 
-
-
 	# Unused at the moment
-
-	# @staticmethod
-	# def	setPlayerChoosedAction(callback):
-	# 	Network.callbacks["CA"] = callback
-
-	# @staticmethod # CA Player has choosed an action
-	# def	sendPlayerChoosedAction(targetSocket, id, action): 
-	# 	Network.sendWrapper(targetSocket, "CA", id, action)
-
 
 
 	# Utility Method
@@ -182,7 +160,7 @@ class	Network():
 		if not datas:
 			return False
 		cmds = datas.split('\x99')
-		# print cmds
+		print cmds
 		for cmd in cmds:
 			key = cmd[:2]
 			if not key:

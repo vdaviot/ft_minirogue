@@ -33,7 +33,6 @@ class		Server():
 		# CE QUE JE DOIT RECEVOIR DES CLIENTS
 		Network.setPlayerNameCallback(self._PlayerNameChanged)
 		Network.setPlayerAskForPosition(self._playerAskingForPosition)
-		# Network.setPlayerSpawningPositionCallback(self._playerSpawningPosition)
 		Network.setPlayerSpawningPositionCallback(self._generatePlayerPositions)
 		Network.setPlayerLetsPlay(self._launchGame)
 		# Network.setPlayerNewIdCallback(self._givePlayerNewID)
@@ -55,6 +54,7 @@ class		Server():
 					self.inputs.append(connection)
 					obj = ConnectedClient(connection)
 					self.connected_clients.append(obj)
+					# self._checkReferedClient()
 					Network.SendPlayerID(connection, obj.id)
 					self.outputs.append(s)
 					self._sendNewClient(connection, obj)
@@ -82,8 +82,8 @@ class		Server():
 	def _generatePlayerPositions(self, id, datas):
 			for s in self.connected_clients:
 				if s.id == id:
-					posX = int(datas.split(":")[0])
-					posY = int(datas.split(":")[1])
+					posX = 1
+					posY = 1
 					while self._collisionCheck(posX, posY) == True:
 						if posX > posY:
 							posX += 1
@@ -106,6 +106,14 @@ class		Server():
 
 	def	_playerHavePlayed(self, id, action):
 		i = 0
+		print "connectedClients:"
+		for player in self.connected_clients:
+			print player.id, player.name
+			if player.name == None:
+				self.connected_clients.remove(player)
+		print "disconnectedClients:"
+		for dc in self.disconnected_clients:
+			print dc.id, dc.name
 		for client in self.connected_clients:
 			if client.wait == True:
 				i += 1
@@ -122,7 +130,7 @@ class		Server():
 	def	_removeConnectedClient(self, target):
 		for p in self.connected_clients:
 			if p.socket.fileno() == target.fileno():
-				self.disconnected_clients.append(p)
+				self.disconnected_clients.append(DisconnectedClient(p.socket, p.name, p.id, p.posX, p.posY))
 				self.connected_clients.remove(p)
 				self._sendClientLeaved(p.socket, p.id)
 		if target in self.inputs:
@@ -136,7 +144,7 @@ class		Server():
 			if s.id == id:
 				socket = s.socket
 		for ppl in self.disconnected_clients:
-			if ppl.id == id:
+			if ppl.name == name:
 				self.connected_clients.append(ConnectedClient(s.socket, ppl.id, ppl.name, ppl.posX, ppl.posY))
 				print "Welcome back {}! ({})".format(ppl.name, ppl.id)
 				self.disconnected_clients.remove(ppl)
@@ -144,15 +152,14 @@ class		Server():
 		for s in self.connected_clients:
 			if s.id == id:
 				s.name = name
+				for x in self.disconnected_clients:
+					if x.name == s.name:
+						s.id = x.id
+						self.disconnected_clients.remove(x)
+				# Network.SendPlayerNewId(s.socket, id, s.id)
+				print s.id, id
 				print "Player {} is now called {}! ".format(id, name)
 				self._sendClientNameChanged(s.socket, s.id, name)
-
-	# def	_playerSpawningPosition(self, id, position):
-	# 	for s in self.connected_clients:
-	# 		if s.id == id:
-	# 			s.posX = int(position.split(":")[0])
-	# 			s.posY = int(position.split(":")[1])
-	# 			break
 
 	def	_playerAskingForPosition(self, id, position):
 		for s in self.connected_clients:
@@ -175,14 +182,10 @@ class		Server():
 			if Server.rawmap[posX][posY] == 2:
 				for s in self.connected_clients:
 					if s.posX == posX and s.posY == posY:
-						print "PLAYER {} ENCOUNTERED!".format(s.name)
 						collision = True
 			else:
 				collision = True
 		return collision
-		# if collision == False:
-		# 	return True
-		# return False
 
 	def	_sendMapClient(self, target):
 		Network.SendMapPlayer(target, Server.map)

@@ -43,8 +43,8 @@ class	Client():
 			self.sock.connect((host, self.port))
 			print "Connected to game server at %d" % self.port
 			self.id = Network.GetPlayerID(self.sock)
-			Network.sendPlayerSpawningPosition(self.sock, self.id, str(self.posX) + ":" + str(self.posY))
 			Network.SendPlayerName(self.sock, self.id, self.name)
+			Network.sendPlayerSpawningPosition(self.sock, self.id, str(self.posX) + ":" + str(self.posY))
 		except socket.error, e:
 			print "Could not connect to the game server at {} ({}).".format(self.port, e)
 			sys.exit(1)
@@ -110,7 +110,7 @@ class	Client():
 				continue
 			else:
 				self.win.win.addnstr(player.posX, player.posY, str(player.id), len(str(player.id)))
-				self.win.win.addnstr(0 + i, 20, player.__str__(), len(player.__str__()))
+				self.win.win.addnstr(0 + i, self.mapCol + 2, player.__str__(), len(player.__str__()))
 				i += 1
 		self.win.win.addnstr(self.posX, self.posY, str(self.id), len(str(self.id)))
 
@@ -130,12 +130,9 @@ class	Client():
 		self.win.win.refresh()
 
 	def _playerLeavedCallback(self, id, datas):
-		i = 0
-		for i in range(len(self.peers)):
-			if self.peers[i].id == id:
-				break
-		p = self.peers.pop(i)
-		del p
+		for s in self.peers:
+			if s.id == id:
+				s.remove()
 		msg = "Player {} disconnected.".format(id)
 		# l = str(len(self.peers))
 		# self.win.win.addnstr(23, 40, l, len(l))
@@ -200,11 +197,9 @@ class	Client():
 			Network.AskServerIfPosition(self.sock, self.id, str(posX) + ":" + str(posY))
 			return True
 		elif action == 127:
-			self.win._leave()	
+			self.win._leave()
 		else:
 			return False
-		# if action == ENTER and self.canPlay == False:
-			# Network.playerSendGoServer(self.sock, self.id, "GO")
 
 class Peers():
 
