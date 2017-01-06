@@ -99,7 +99,10 @@ class		Server():
 	def	_sendAllPlayerPositions(self):
 		toSend = ""
 		for client in self.connected_clients:
-			toSend += str(client.id) + "=" + str(client.posX) + ":" + str(client.posY) + "\n"
+			if client.name:
+				toSend += str(client.id) + "@" + client.name + "=" + str(client.posX) + ":" + str(client.posY) + "\n"
+			else:
+				toSend += str(client.id) + "=" + str(client.posX) + ":" + str(client.posY) + "\n"
 		for client in self.connected_clients:
 			Network.sendClientPositionList(client.socket, client.id, toSend)
 
@@ -117,6 +120,7 @@ class		Server():
 		for client in self.connected_clients:
 			if client.wait == True:
 				i += 1
+		print len(self.connected_clients)
 		if i == len(self.connected_clients):
 			print "All player have played!"
 			self.turn += 1
@@ -145,9 +149,10 @@ class		Server():
 				socket = s.socket
 		for ppl in self.disconnected_clients:
 			if ppl.name == name:
-				self.connected_clients.append(ConnectedClient(s.socket, ppl.id, ppl.name, ppl.posX, ppl.posY))
-				print "Welcome back {}! ({})".format(ppl.name, ppl.id)
+				self.connected_clients.append(ConnectedClient(socket, ppl.id, ppl.name, ppl.posX, ppl.posY))
 				self.disconnected_clients.remove(ppl)
+				print "Welcome back {}! ({})".format(ppl.name, ppl.id)
+				# Network.SendPlayerNewId(socket, ppl.id, str(ppl.id))
 				return
 		for s in self.connected_clients:
 			if s.id == id:
@@ -157,7 +162,6 @@ class		Server():
 						s.id = x.id
 						self.disconnected_clients.remove(x)
 				# Network.SendPlayerNewId(s.socket, id, s.id)
-				print s.id, id
 				print "Player {} is now called {}! ".format(id, name)
 				self._sendClientNameChanged(s.socket, s.id, name)
 
@@ -179,12 +183,15 @@ class		Server():
 	def	_collisionCheck(self, posX, posY):
 		collision = False
 		if posX >= 0 and posY >= 0:
-			if Server.rawmap[posX][posY] == 2:
-				for s in self.connected_clients:
-					if s.posX == posX and s.posY == posY:
-						collision = True
-			else:
-				collision = True
+			try:
+				if Server.rawmap[posX][posY] == 2:
+					for s in self.connected_clients:
+						if s.posX == posX and s.posY == posY: # A MODIF
+							collision = True
+				else:
+					collision = True
+			except:
+				self._collisionCheck(posX, posY)
 		return collision
 
 	def	_sendMapClient(self, target):

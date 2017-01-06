@@ -4,10 +4,7 @@ HIGHEST/HIGH/MID/LOW/LOWEST
 
 Server / Client:
 
-	- Corriger l'action en trop de chaque tour (HIGHEST)
 	- Syncro les ID des joueurs quand quitter a l'arrache (HIGHEST)
-	- Suppression du code inutile/optimisation du code reutilisable (HIGHEST)
-	- Gestion des Noms des joueurs pour affichage (MID)
 
 Display:
 

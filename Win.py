@@ -26,6 +26,7 @@ class	Win():
 		stdscr = curses.initscr()
 		curses.curs_set(0)
 		curses.cbreak()
+		# curses.flash()
 		self.win = curses.newwin(col, row, 0, 0)
 		self.win.keypad(1)
 		self.run = True

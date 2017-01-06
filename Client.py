@@ -55,7 +55,7 @@ class	Client():
 		Network.setPlayerAddedCallback(self._playerAddedCallback)
 		Network.setPlayerIdCallback(self._playerHaveNewId)
 		Network.setPlayerLeavedCallback(self._playerLeavedCallback)
-		Network.setPlayerNameCallback(self._playerChangeNameCallback)
+		# Network.setPlayerNameCallback(self._playerChangeNameCallback)
 		Network.setMapCallback(self._playerAskMap)
 		Network.setNextTurn(self._playerGetNextTurn)
 		Network.setPlayerLetsPlay(self._playerLetsPlay)
@@ -75,16 +75,25 @@ class	Client():
 	def	_getOtherPlayerPosition(self, id, datas):
 		for client in datas.split('\n'):
 			if client != "":
-				id, coord = client.split('=')[0], client.split("=")[1]
+				if '@' in client:
+					id, tmp = client.split('@')[0], client.split('@')[1]
+					name, coord = tmp.split('=')[0], tmp.split('=')[1]
+				else:
+					id, coord = client.split('=')[0], client.split("=")[1]
 				posX, posY = int(coord.split(':')[0]), int(coord.split(':')[1])
-				b = 0
+				nb = 0
 				for ppl in self.peers:
-					if ppl.id == id:
+					if ppl.id == id and self.id != id:
 						ppl.posX, ppl.posY = posX, posY
+						if name:
+							ppl.name = name
 					else:
-						b += 1
-				if b == len(self.peers):
-					self.peers.append(Peers(id, posX, posY))
+						nb += 1
+				if nb == len(self.peers):
+					if name:
+						self.peers.append(Peers(id, posX, posY, name))
+					else:
+						self.peers.append(Peers(id, posX, posY))
 			
 	def	_playerGetNextTurn(self, id, datas):
 		self.turn = int(datas)
@@ -108,7 +117,7 @@ class	Client():
 		for player in self.peers:
 			if player.posX == self.posX and player.posY == self.posY or player.id == -1:
 				continue
-			else:
+			elif player.connected == True:
 				self.win.win.addnstr(player.posX, player.posY, str(player.id), len(str(player.id)))
 				self.win.win.addnstr(0 + i, self.mapCol + 2, player.__str__(), len(player.__str__()))
 				i += 1
@@ -122,24 +131,14 @@ class	Client():
 
 	def _playerAddedCallback(self, id, datas):
 		msg = "player joined the game: " + str(id)
-		# self.peers.append(Peers(id, 0, 0))
-		# self._getOtherPlayerName(id, datas)
 		self.win.win.addnstr(20, 40, msg, len(msg))
-		self.players[id] = {"name":""}
-		self.players[id]["name"] = str(id)
 		self.win.win.refresh()
 
 	def _playerLeavedCallback(self, id, datas):
 		for s in self.peers:
 			if s.id == id:
-				s.remove()
+				s.connected = False
 		msg = "Player {} disconnected.".format(id)
-		# l = str(len(self.peers))
-		# self.win.win.addnstr(23, 40, l, len(l))
-		# for people in self.peers:
-		# 	people.id = int(people.id) - 1
-		# 	self.win.win.addnstr(25 + people.id, 40, str(people.id), len(str(people.id)))
-		# Network.SendNewIdSignal(self.sock, self.id, "{}".format(str(self.id - 1)))
 		self.win.win.addnstr(22, 40, msg, len(msg))
 		self.win.win.refresh()
 
@@ -147,7 +146,6 @@ class	Client():
 		for s in self.peers:
 			if id == s.id:
 				s.name = datas
-		self.players[id]["name"] = datas
 
 	def	_waitEvent(self):
 		try:
@@ -157,10 +155,9 @@ class	Client():
 					readable, writable, exceptionnal = select.select(self.inputs, self.outputs, self.inputs)
 					for s in readable:
 						if s == 0:
-							print "FDP"
 							if self.wait == False:
 								action = self.win._nextTurn()
-								self.win.win.addnstr(30, 40, str(action), len(str(action)))
+								# self.win.win.addnstr(30, 40, str(action), len(str(action)))
 								if self._executeWinActions(action) != False:
 									self.win.win.clear()
 							# else:
@@ -203,11 +200,12 @@ class	Client():
 
 class Peers():
 
-	def __init__(self, id, posX, posY):
+	def __init__(self, id, posX, posY, name=None):
 		self.id = id
 		self.name = None
 		self.posX = int(posX)
 		self.posY = int(posY)
+		self.connected = True
 
 	def	__str__(self):
 		if self.name != None:

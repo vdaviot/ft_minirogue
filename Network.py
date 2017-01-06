@@ -160,7 +160,7 @@ class	Network():
 		if not datas:
 			return False
 		cmds = datas.split('\x99')
-		print cmds
+		# print cmds
 		for cmd in cmds:
 			key = cmd[:2]
 			if not key:
