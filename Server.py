@@ -12,6 +12,7 @@
 
 import socket, select, sys, types, struct, time
 from Network import Network
+from Save import Save
 
 class		Server():
 
@@ -19,6 +20,7 @@ class		Server():
 		Server.rawmap = map.generate_definitive_map()
 		Server.map = map.__str__()
 		Server.row = map.col
+		self.Saver = Save()
 		self.turn = 0
 		self.nextTurn = self.turn + 1
 		self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -134,7 +136,9 @@ class		Server():
 	def	_removeConnectedClient(self, target):
 		for p in self.connected_clients:
 			if p.socket.fileno() == target.fileno():
+				self.Saver._saveCaracter(p)
 				self.disconnected_clients.append(DisconnectedClient(p.socket, p.name, p.id, p.posX, p.posY))
+
 				self.connected_clients.remove(p)
 				self._sendClientLeaved(p.socket, p.id)
 		if target in self.inputs:
@@ -245,6 +249,11 @@ class	ConnectedClient():
 	def __str__(self):
 		msg = str(self.id) + " should wait?: {}".format(self.wait)
 		return msg
+
+	def	_saveFormatting(self):
+		# id:name = posX:posY [stuff]
+		return str(self.id) + ":" + self.name + "=" + str(self.posX) + ":" + str(self.posY)
+
 
 	def	_setClientName(self, name):
 		self.name = name

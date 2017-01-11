@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-import socket, select, sys, Queue, struct, time, random
+import socket, select, sys, Queue, struct, time, random, os
 from Network import Network
 from Win import Win
 
@@ -28,10 +28,13 @@ class	Client():
 	posY = 1
 
 	def	__init__(self, name, host, port = 4242):
-		self.name = name
 		self.win = Win(400, 400)
+		# if self._checkIfPlayerExist(name) == False:
+		self.name = name
 		self.posY = 1
 		self.posX = 1
+		# else:
+		# 	self._getSavedPlayer(name)
 		self.host = host
 		self.port = int(port)
 		self.turn = 0
@@ -62,6 +65,25 @@ class	Client():
 		Network.setServerGiveClientPositions(self._getOtherPlayerPosition)
 		Network.setPlayerPositionChangeCallback(self._playerPositionChangeCallback)
 		Network.setOtherPlayerName(self._getOtherPlayerName)
+
+	def	_checkIfPlayerExist(self, name):
+		try:
+			directory = os.listdir("save/")
+		except:
+			return False
+		for files in directory:
+			if name in files:
+				self._loadProfile(name)
+				return True
+
+	def	_loadProfile(self, name):
+		# id:name = posX:posY [stuff]
+		profile = os.open("save/" + name).read()
+		infos, pos = profile.split('=')[0], profile.split('=')[1]
+		self.id, self.name = infos.split(':')[0], infos.split(':')[1]
+		self.posX, self.posY = pos.split(':')[0], pos.split(':')[1]
+		profile.close()
+
 
 	def	_getOtherPlayerName(self, id, datas):
 		for s in self.peers:
