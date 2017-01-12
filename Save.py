@@ -16,13 +16,17 @@ class		Save():
 
 	def	__init__(self):
 		self.directory = "save/"
-		if os.path.isdir("save") == False:
+		if os.path.isdir(self.directory) == False:
 			os.mkdir(self.directory)
 
 	def	_saveCaracter(self, profile):
-		filename = self.directory + profile.name + str(time.time())
+		filename = self.directory + profile.name
 		file = open(filename, 'w+')
 		toWrite = profile._saveFormatting()
-		print toWrite
 		file.write(profile._saveFormatting())
 		file.close()
+
+	def	_EraseAllSave(self):
+		for file in os.listdir(self.directory):
+			os.remove(self.directory + file)
+		os.rmdir(self.directory)

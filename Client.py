@@ -29,12 +29,12 @@ class	Client():
 
 	def	__init__(self, name, host, port = 4242):
 		self.win = Win(400, 400)
-		# if self._checkIfPlayerExist(name) == False:
 		self.name = name
-		self.posY = 1
-		self.posX = 1
-		# else:
-		# 	self._getSavedPlayer(name)
+		if self._checkIfPlayerExist(name) == False:
+			self.posY = 1
+			self.posX = 1
+		else:
+			self._loadProfile(name)
 		self.host = host
 		self.port = int(port)
 		self.turn = 0
@@ -72,16 +72,18 @@ class	Client():
 		except:
 			return False
 		for files in directory:
-			if name in files:
-				self._loadProfile(name)
+			if name and name == files:
 				return True
+		return False
+				# self._loadProfile(name)
 
 	def	_loadProfile(self, name):
 		# id:name = posX:posY [stuff]
-		profile = os.open("save/" + name).read()
-		infos, pos = profile.split('=')[0], profile.split('=')[1]
-		self.id, self.name = infos.split(':')[0], infos.split(':')[1]
-		self.posX, self.posY = pos.split(':')[0], pos.split(':')[1]
+		profile = open("save/" + name, 'r')
+		toSplit = profile.read()
+		infos, pos = toSplit.split('=')[0], toSplit.split('=')[1]
+		self.id, self.name = int(infos.split(':')[0]), infos.split(':')[1]
+		self.posX, self.posY = int(pos.split(':')[0]), int(pos.split(':')[1])
 		profile.close()
 
 
@@ -95,6 +97,7 @@ class	Client():
 		self.win.win.refresh()
 
 	def	_getOtherPlayerPosition(self, id, datas):
+		name = ""
 		for client in datas.split('\n'):
 			if client != "":
 				if '@' in client:
@@ -107,12 +110,12 @@ class	Client():
 				for ppl in self.peers:
 					if ppl.id == id and self.id != id:
 						ppl.posX, ppl.posY = posX, posY
-						if name:
+						if name != "":
 							ppl.name = name
 					else:
 						nb += 1
 				if nb == len(self.peers):
-					if name:
+					if name != "":
 						self.peers.append(Peers(id, posX, posY, name))
 					else:
 						self.peers.append(Peers(id, posX, posY))
